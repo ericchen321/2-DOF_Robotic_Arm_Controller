@@ -35,7 +35,7 @@ void setup() {
   attachInterrupt(0, doEncoderA, CHANGE);
   // second interrupt
   attachInterrupt(1, doEncoderB, CHANGE);
-  Serial.begin (2000000);
+  Serial.begin (4000000);
 }
 
 void loop() {
