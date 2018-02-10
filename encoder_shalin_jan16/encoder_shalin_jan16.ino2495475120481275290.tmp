@@ -1,0 +1,16 @@
+
+#define encoder0PinA = 7
+#define encoder0PinB = 8
+
+void setup() {
+  pinMode (encoder0PinA, INPUT);
+  pinMode (encoder0PinB, INPUT);
+  Serial.begin (9600);
+}
+
+void loop() {
+  digitalRead()
+    Serial.print (encoder0Pos);
+    Serial.print ("/");
+
+}
