@@ -9,7 +9,7 @@ void setup() {
  
   // first interrupt
   attachInterrupt(0, doEncoderA, RISING);
-  Serial.begin (152000);
+  Serial.begin (2000000);
 }
 
 void loop() {
