@@ -78,25 +78,25 @@ void encoder () {
 
 void doEncoderA() {
   // look for a low-to-high on channel A
-  if (digitalRead(encoder0PinA) == HIGH) {
+  if (PORTD & B00000100 == B00000100) { // check if A is high
 
     // check channel B to see which way encoder is turning
-    if (digitalRead(encoder0PinB) == LOW) {
-      encoder0Pos = encoder0Pos + 1;         // CW
+    if (PORTD & B00001000 == B00000000) { // check if B is low
+      encoder0Pos = encoder0Pos - 1;         // CW
     }
     else {
-      encoder0Pos = encoder0Pos - 1;         // CCW
+      encoder0Pos = encoder0Pos + 1;         // CCW
     }
   }
 
   else   // must be a high-to-low edge on channel A
   {
     // check channel B to see which way encoder is turning
-    if (digitalRead(encoder0PinB) == HIGH) {
-      encoder0Pos = encoder0Pos + 1;          // CW
+    if (PORTD & B00001000 == B00001000) {  // check if B is high
+      encoder0Pos = encoder0Pos - 1;          // CW
     }
     else {
-      encoder0Pos = encoder0Pos - 1;          // CCW
+      encoder0Pos = encoder0Pos + 1;          // CCW
     }
   }
   // use for debugging - remember to comment out
@@ -104,14 +104,14 @@ void doEncoderA() {
 
 void doEncoderB() {
   // look for a low-to-high on channel B
-  if (digitalRead(encoder0PinB) == HIGH) {
+  if (PORTD & B00001000 == B00001000) { // if B is high
 
     // check channel A to see which way encoder is turning
-    if (digitalRead(encoder0PinA) == HIGH) {
-      encoder0Pos = encoder0Pos + 1;         // CW
+    if (PORTD & B00000100 == B00000100) { // if A is high
+      encoder0Pos = encoder0Pos - 1;         // CW
     }
     else {
-      encoder0Pos = encoder0Pos - 1;         // CCW
+      encoder0Pos = encoder0Pos + 1;         // CCW
     }
   }
 
@@ -119,11 +119,11 @@ void doEncoderB() {
 
   else {
     // check channel B to see which way encoder is turning
-    if (digitalRead(encoder0PinA) == LOW) {
-      encoder0Pos = encoder0Pos + 1;          // CW
+    if (PORTD & B00000100 == B00000000) { // if A is low
+      encoder0Pos = encoder0Pos - 1;          // CW
     }
     else {
-      encoder0Pos = encoder0Pos - 1;          // CCW
+      encoder0Pos = encoder0Pos + 1;          // CCW
     }
   }
 }
