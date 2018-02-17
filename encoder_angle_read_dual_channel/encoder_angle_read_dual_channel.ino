@@ -65,10 +65,10 @@ digitalWrite(in1, HIGH);
 // calculates the relative angle at which the motor's shaft is
 void encoder () {
   if((encoder0Pos % 4) == 0) {
-    Currenttime = micros();
-    Serial.print (Currenttime);
-    Serial.print (",");
     Serial.print (encoder0Pos);
+    Serial.print (",");
+    Currenttime = micros();
+    Serial.print (Currenttime);  
     Serial.println ("");
   }
   
