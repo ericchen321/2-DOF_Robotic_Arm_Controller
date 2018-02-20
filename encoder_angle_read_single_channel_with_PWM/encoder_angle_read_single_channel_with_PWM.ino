@@ -9,7 +9,7 @@
 
 volatile signed long encoder0Pos = 0;
 volatile unsigned char flag = 0;
-int pwmOutput = 0;
+int pwmOutput = 250; // pwmOutput = 255 correspond to 100% duty cycle
 
 void setup() {
   // motor
@@ -19,8 +19,6 @@ void setup() {
   // Set initial rotation direction
   digitalWrite(in1, HIGH);
   digitalWrite(in2, LOW);
-  // pwmOutput = 255 correspond to 100% duty cycle
-  pwmOutput = 255;
   analogWrite(enA, pwmOutput); // Send PWM signal to L298N Enable pin
   
   // encoder

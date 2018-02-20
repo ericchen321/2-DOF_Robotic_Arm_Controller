@@ -3,7 +3,7 @@
 #define in2 7
 #define button 8
 
-int pwmOutput = 0;
+int pwmOutput = 128;
 
 void setup() {
   pinMode(enA, OUTPUT);
