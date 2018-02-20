@@ -14,6 +14,7 @@ PID	KEYWORD1
 
 SetMode	KEYWORD2
 Compute	KEYWORD2
+CheckDirection  KEYWORD2
 SetOutputLimits	KEYWORD2
 SetTunings	KEYWORD2
 SetControllerDirection	KEYWORD2
@@ -22,7 +23,7 @@ GetKp	KEYWORD2
 GetKi	KEYWORD2
 GetKd	KEYWORD2
 GetMode	KEYWORD2
-GetDirection	KEYWORD2
+GetDirection  KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

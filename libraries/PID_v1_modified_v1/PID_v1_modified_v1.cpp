@@ -168,15 +168,6 @@ void PID::SetOutputLimits(double Min, double Max)
 	   if(outputSum > outMax) outputSum= outMax;
 	   else if(outputSum < outMin) outputSum= outMin;
 	   */
-
-	   // change the pwm and direction if *myOutput is less than 0
-	   if (*myOutput < 0) {
-		   SetControllerDirection(REVERSE);
-		   *myOutput = -1 * *myOutput;
-	   }
-	   else {
-		   SetControllerDirection(DIRECT);
-	   }
    }
 }
 
@@ -217,11 +208,23 @@ void PID::SetControllerDirection(int Direction)
 {
    if(inAuto && Direction !=controllerDirection)
    {
-	    kp = (0 - kp);
-      ki = (0 - ki);
-      kd = (0 - kd);
+	    controllerDirection = Direction;
    }
-   controllerDirection = Direction;
+   
+}
+
+
+void PID::CheckDirection()
+{
+  // change the pwm and direction if *myOutput is less than 0
+ if (*myOutput < 0) {
+   SetControllerDirection(REVERSE);
+   *myOutput = -1 * *myOutput;
+ }
+ else {
+   SetControllerDirection(DIRECT);
+ }
+  
 }
 
 /* Status Funcions*************************************************************

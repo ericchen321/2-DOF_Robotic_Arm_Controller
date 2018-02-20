@@ -38,6 +38,10 @@ class PID
 										                      //   it's likely the user will want to change this depending on
 										                      //   the application
 
+    void CheckDirection();   // change the direction based on the output. If output is less than 0 then 
+                                    // set the direction to reverse, and flip the output
+                                          
+
   //available but not commonly used functions ********************************************************
     void SetTunings(double, double,       // * While most users will set the tunings once in the 
                     double);         	    //   constructor, this function gives the user the option
@@ -51,6 +55,7 @@ class PID
 										  //   once it is set in the constructor.
     void SetSampleTime(int);              // * sets the frequency, in Milliseconds, with which 
                                           //   the PID calculation is performed.  default is 100
+       
 										  
 										  
 										  

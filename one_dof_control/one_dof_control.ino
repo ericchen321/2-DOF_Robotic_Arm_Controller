@@ -1,6 +1,5 @@
-#include "PID_v1_modified_v1.h"
-
 /* included necessary libraries */
+#include <PID_v1_modified_v1.h>
 
 
 /* Define pins */
@@ -36,10 +35,11 @@ void setup() {
   attachInterrupt(1, doEncoder0_B, CHANGE);
 
 
-  /* Set initial rotation direction */
+  /* Set initial rotation direction and pwm */
   digitalWrite(MOTOR0_IN1, HIGH);
   digitalWrite(MOTOR0_IN2, LOW);
-
+  analogWrite(MOTOR0_ENA, 0);
+  
 
   /* initialize the actual angle and desired angle for the PID algorithm */
   encoder();
@@ -55,6 +55,7 @@ void setup() {
 void loop() {
   encoder();
   myPID.Compute();
+  myPID.CheckDirection();
   motor();
 }
 
@@ -80,6 +81,7 @@ void motor () {
 
   analogWrite(MOTOR0_ENA, pwmOutput);
 }
+
 
 
 /* interrupt channel A */
