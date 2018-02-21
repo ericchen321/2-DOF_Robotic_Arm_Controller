@@ -14,7 +14,6 @@ PID	KEYWORD1
 
 SetMode	KEYWORD2
 Compute	KEYWORD2
-CheckDirection  KEYWORD2
 SetOutputLimits	KEYWORD2
 SetTunings	KEYWORD2
 SetControllerDirection	KEYWORD2

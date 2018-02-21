@@ -39,7 +39,10 @@ void setup() {
   digitalWrite(MOTOR0_IN1, HIGH);
   digitalWrite(MOTOR0_IN2, LOW);
   analogWrite(MOTOR0_ENA, 0);
-  
+
+
+  /* initialize serial communication */
+  Serial.begin(2000000);
 
   /* initialize the actual angle and desired angle for the PID algorithm */
   encoder();
@@ -55,8 +58,8 @@ void setup() {
 void loop() {
   encoder();
   myPID.Compute();
-  myPID.CheckDirection();
   motor();
+  serialStuff();
 }
 
 
@@ -70,18 +73,27 @@ void encoder () {
 
 /* set the rotation and pwm of the motor */
 void motor () {
-  if ( myPID.GetDirection() == DIRECT ) {
-    digitalWrite(MOTOR0_IN1, HIGH);
-    digitalWrite(MOTOR0_IN2, LOW);
-  }
-  else {
+  if ( pwmOutput < 0 ) {
+    pwmOutput = -1 * pwmOutput;
     digitalWrite(MOTOR0_IN1, LOW);
     digitalWrite(MOTOR0_IN2, HIGH);
+    analogWrite(MOTOR0_ENA, pwmOutput);
+  }
+  else {
+    digitalWrite(MOTOR0_IN1, HIGH);
+    digitalWrite(MOTOR0_IN2, LOW);
+    analogWrite(MOTOR0_ENA, pwmOutput);
   }
 
-  analogWrite(MOTOR0_ENA, pwmOutput);
 }
 
+
+void serialStuff () {
+  Serial.print(actualAngle);
+  Serial.print(",");
+  Serial.print(pwmOutput);
+  Serial.println("");
+}
 
 
 /* interrupt channel A */
@@ -91,10 +103,10 @@ void doEncoder0_A() {
 
     // check channel B to see which way encoder is turning
     if (PORTD & B00001000 == B00000000) { // check if B is low
-      encoder0Pos = encoder0Pos - 1;         // CW
+      encoder0Pos = encoder0Pos + 1;         // CW
     }
     else {
-      encoder0Pos = encoder0Pos + 1;         // CCW
+      encoder0Pos = encoder0Pos - 1;         // CCW
     }
   }
 
@@ -102,10 +114,10 @@ void doEncoder0_A() {
   {
     // check channel B to see which way encoder is turning
     if (PORTD & B00001000 == B00001000) {  // check if B is high
-      encoder0Pos = encoder0Pos - 1;          // CW
+      encoder0Pos = encoder0Pos + 1;          // CW
     }
     else {
-      encoder0Pos = encoder0Pos + 1;          // CCW
+      encoder0Pos = encoder0Pos - 1;          // CCW
     }
   }
   // use for debugging - remember to comment out
@@ -119,10 +131,10 @@ void doEncoder0_B() {
 
     // check channel A to see which way encoder is turning
     if (PORTD & B00000100 == B00000100) { // if A is high
-      encoder0Pos = encoder0Pos - 1;         // CW
+      encoder0Pos = encoder0Pos + 1;         // CW
     }
     else {
-      encoder0Pos = encoder0Pos + 1;         // CCW
+      encoder0Pos = encoder0Pos - 1;         // CCW
     }
   }
 
@@ -131,10 +143,10 @@ void doEncoder0_B() {
   else {
     // check channel B to see which way encoder is turning
     if (PORTD & B00000100 == B00000000) { // if A is low
-      encoder0Pos = encoder0Pos - 1;          // CW
+      encoder0Pos = encoder0Pos + 1;          // CW
     }
     else {
-      encoder0Pos = encoder0Pos + 1;          // CCW
+      encoder0Pos = encoder0Pos - 1;          // CCW
     }
   }
 }

@@ -164,10 +164,9 @@ void PID::SetOutputLimits(double Min, double Max)
 	   else if(*myOutput < outMin) *myOutput = outMin;
 
 	   // caps the outputSum to min/max
-	   /*
 	   if(outputSum > outMax) outputSum= outMax;
 	   else if(outputSum < outMin) outputSum= outMin;
-	   */
+	   
    }
 }
 
@@ -206,26 +205,15 @@ void PID::Initialize()
  ******************************************************************************/
 void PID::SetControllerDirection(int Direction)
 {
-   if(inAuto && Direction !=controllerDirection)
-   {
-	    controllerDirection = Direction;
-   }
-   
+	if (inAuto && Direction != controllerDirection)
+	{
+		kp = (0 - kp);
+		ki = (0 - ki);
+		kd = (0 - kd);
+	}
+	controllerDirection = Direction;
 }
 
-
-void PID::CheckDirection()
-{
-  // change the pwm and direction if *myOutput is less than 0
- if (*myOutput < 0) {
-   SetControllerDirection(REVERSE);
-   *myOutput = -1 * *myOutput;
- }
- else {
-   SetControllerDirection(DIRECT);
- }
-  
-}
 
 /* Status Funcions*************************************************************
  * Just because you set the Kp=-1 doesn't mean it actually happened.  these

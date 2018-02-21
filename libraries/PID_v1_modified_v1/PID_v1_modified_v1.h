@@ -37,9 +37,6 @@ class PID
     void SetOutputLimits(double, double); // * clamps the output to a specific range. 0-255 by default, but
 										                      //   it's likely the user will want to change this depending on
 										                      //   the application
-
-    void CheckDirection();   // change the direction based on the output. If output is less than 0 then 
-                                    // set the direction to reverse, and flip the output
                                           
 
   //available but not commonly used functions ********************************************************
