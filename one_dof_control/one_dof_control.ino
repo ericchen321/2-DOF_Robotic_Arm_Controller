@@ -16,7 +16,7 @@ volatile signed long encoder0Pos = 0;
 
 /* Define Variables for the PID algorithm and initialize the algorithm */
 double desiredAngle, actualAngle, pwmOutput;
-double Kp=2, Ki=5, Kd=1;
+double Kp=0.174, Ki=0.001, Kd=0;
 PID myPID(&actualAngle, &pwmOutput, &desiredAngle, Kp, Ki, Kd, DIRECT);
 
 
@@ -46,7 +46,7 @@ void setup() {
 
   /* initialize the actual angle and desired angle for the PID algorithm */
   encoder();
-  desiredAngle = 100;
+  desiredAngle = 180.0;
 
 
   /* turn the PID on */
@@ -59,7 +59,7 @@ void loop() {
   encoder();
   myPID.Compute();
   motor();
-  serialStuff();
+   serialStuff() ;
 }
 
 
@@ -74,10 +74,9 @@ void encoder () {
 /* set the rotation and pwm of the motor */
 void motor () {
   if ( pwmOutput < 0 ) {
-    pwmOutput = -1 * pwmOutput;
     digitalWrite(MOTOR0_IN1, LOW);
     digitalWrite(MOTOR0_IN2, HIGH);
-    analogWrite(MOTOR0_ENA, pwmOutput);
+    analogWrite(MOTOR0_ENA, (-1 * pwmOutput));
   }
   else {
     digitalWrite(MOTOR0_IN1, HIGH);
