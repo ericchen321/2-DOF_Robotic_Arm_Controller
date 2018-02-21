@@ -96,13 +96,12 @@ void serialStuff () {
 }
 
 
-/* interrupt channel A */
 void doEncoder0_A() {
   // look for a low-to-high on channel A
-  if (PORTD & B00000100 == B00000100) { // check if A is high
+  if (digitalRead(ENCODER0_PINA) == HIGH) {
 
     // check channel B to see which way encoder is turning
-    if (PORTD & B00001000 == B00000000) { // check if B is low
+    if (digitalRead(ENCODER0_PINB) == LOW) {
       encoder0Pos = encoder0Pos + 1;         // CW
     }
     else {
@@ -113,7 +112,7 @@ void doEncoder0_A() {
   else   // must be a high-to-low edge on channel A
   {
     // check channel B to see which way encoder is turning
-    if (PORTD & B00001000 == B00001000) {  // check if B is high
+    if (digitalRead(ENCODER0_PINB) == HIGH) {
       encoder0Pos = encoder0Pos + 1;          // CW
     }
     else {
@@ -123,14 +122,12 @@ void doEncoder0_A() {
   // use for debugging - remember to comment out
 }
 
-
-/* interrupt channel B */
 void doEncoder0_B() {
   // look for a low-to-high on channel B
-  if (PORTD & B00001000 == B00001000) { // if B is high
+  if (digitalRead(ENCODER0_PINB) == HIGH) {
 
     // check channel A to see which way encoder is turning
-    if (PORTD & B00000100 == B00000100) { // if A is high
+    if (digitalRead(ENCODER0_PINA) == HIGH) {
       encoder0Pos = encoder0Pos + 1;         // CW
     }
     else {
@@ -142,7 +139,7 @@ void doEncoder0_B() {
 
   else {
     // check channel B to see which way encoder is turning
-    if (PORTD & B00000100 == B00000000) { // if A is low
+    if (digitalRead(ENCODER0_PINA) == LOW) {
       encoder0Pos = encoder0Pos + 1;          // CW
     }
     else {
