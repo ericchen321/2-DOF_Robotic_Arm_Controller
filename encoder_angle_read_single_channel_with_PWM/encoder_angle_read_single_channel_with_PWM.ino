@@ -9,7 +9,7 @@
 
 volatile signed long encoder0Pos = 0;
 volatile unsigned char flag = 0;
-int pwmOutput = 250; // pwmOutput = 255 correspond to 100% duty cycle
+int pwmOutput = 63; // pwmOutput = 255 correspond to 100% duty cycle
 
 void setup() {
   // motor
