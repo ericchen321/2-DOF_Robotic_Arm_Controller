@@ -8,15 +8,15 @@ public:
 	#define SETPOINT_PERIOD 8 // set point period measured in milliseconds
 
 
-	SetPoint(double, int, double*, double*, double*, double*, double*, double*);
+	SetPoint(double, int, double*, double*, double*, double*, double*, double*, double*, double*);
 
 	void LoadSetPoint();
 	
 	void LoadKinParams();
 	
-	void RadToDeg();
+	double RadToDeg(double);
 
-	void DegToRad();
+	double DegToRad(double);
 
 	void InverseKinY();
 
@@ -26,6 +26,8 @@ private:
 	int mySetPointSize;
 	double* myDesiredXArray;
 	double* myDesiredYArray;
+	double* myDesiredYawArray;
+	double* myDesiredPitchArray;
 	double* myDesiredX;
 	double* myDesiredY;
 	double* myDesiredYaw;
@@ -35,8 +37,6 @@ private:
 	double desiredY;
 	double desiredYaw;
 	double desiredPitch;
-	double angleInDeg;
-	double angleInRad;
 	int signed long currentTime;
 	int signed long lastTime;
 	int setPointCounter;

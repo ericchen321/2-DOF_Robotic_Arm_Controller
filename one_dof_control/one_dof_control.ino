@@ -21,9 +21,11 @@
 volatile signed long encoder0Pos = 0;
 
 
-/* Define x,y coordinate arrays */
+/* Define x,y coordinate arrays and yaw, pitch angle arrays*/
 double desiredXArray[SETPOINT_SIZE];
 double desiredYArray[SETPOINT_SIZE];
+double desiredYawArray[SETPOINT_SIZE];
+double desiredPitchArray[SETPOINT_SIZE];
 double desiredX;
 double desiredY;
 double desiredYaw;
@@ -31,12 +33,11 @@ double desiredPitch;
 unsigned char i = 0; // index for traversing desired Y array
 
 
-/* Define control variables for the PID and initialze all PID related stuff */
+/* Define control variables for the PID*/
 double actualPitch, pwmOutput;
 double Kp=0.174, Ki=0.001, Kd=0;
-SetPoint mySetPoint(HEIGHT, SETPOINT_SIZE, desiredXArray, desiredYArray, &desiredX, &desiredY, &desiredYaw, &desiredPitch);
+SetPoint mySetPoint(HEIGHT, SETPOINT_SIZE, desiredXArray, desiredYArray, desiredYawArray, desiredPitchArray, &desiredX, &desiredY, &desiredYaw, &desiredPitch);
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
-
 
 
 void setup() {
@@ -63,14 +64,15 @@ void setup() {
   Serial.begin(2000000);
 
 
-  /* initialize desired x,y coordinates */
+  /* initialize desired x,y coordinates and convert them to angles in degree */
   for (i = 0; i < SETPOINT_SIZE; i++){
     desiredYArray[i] = i * SETPOINT_TIME;  
   }
   for (i = 0; i < SETPOINT_SIZE; i++){
     desiredYArray[i] = RADIUS * sin ( 2 * 3.14 * FRAME_PER_SEC * desiredYArray[i] );
   }
-  
+  mySetPoint.InverseKinY();
+
 
   /* initialize actual and desired angle for the PID algorithm */
   encoder();
@@ -96,8 +98,6 @@ void loop() {
 /* manipulate set points */
 void setPoint () {
   mySetPoint.LoadSetPoint();
-  mySetPoint.LoadKinParams();
-  mySetPoint.InverseKinY();
 }
 
 
@@ -125,10 +125,15 @@ void motor () {
 
 
 void serialStuff () {
-  Serial.print(actualPitch);
-  Serial.print(",");
-  Serial.print(pwmOutput);
-  Serial.println("");
+  //Serial.print(desiredPitch);
+  //Serial.print(",");
+  //Serial.print(pwmOutput);
+  //Serial.println("");
+  delay(1000);
+  for(i=0; i<SETPOINT_SIZE;i++){
+    Serial.println(desiredPitchArray[i]);  
+  }
+  while(1);
 }
 
 
