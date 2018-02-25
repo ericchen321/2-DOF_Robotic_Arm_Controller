@@ -8,7 +8,7 @@ public:
 	#define SETPOINT_PERIOD 8 // set point period measured in milliseconds
 
 
-	SetPoint(double, int, double*, double*, double*, double*, double*, double*);
+	SetPoint(double, int, double*, double*, double*, double*, double*, double*); // constructor
 
 	void LoadSetPoint();
 	

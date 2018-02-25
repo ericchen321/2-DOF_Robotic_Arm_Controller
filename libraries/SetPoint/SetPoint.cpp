@@ -1,4 +1,4 @@
-/* stuff */
+/* take existing Arduino stuff */
 #if ARDUINO >= 100
 #include "Arduino.h"
 #else

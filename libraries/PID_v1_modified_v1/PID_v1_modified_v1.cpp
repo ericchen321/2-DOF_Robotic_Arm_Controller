@@ -34,6 +34,12 @@ PID::PID(double* Input, double* Output, double* Setpoint,
     PID::SetTunings(Kp, Ki, Kd, POn);
 
     lastTime = micros()-SampleTime;
+
+	int i;										// initialize velocity array
+	for (i = 0; i < VELOCTIY_ARRAY_SIZE; i++) {
+		velocity[i] = 0;
+	}
+	velCounter = VELOCTIY_ARRAY_SIZE - 1;	 // initialize counter used for indicating whether to use moving mean or not
 }
 
 /*Constructor (...)*********************************************************
@@ -57,6 +63,8 @@ PID::PID(double* Input, double* Output, double* Setpoint,
  **********************************************************************************/
 bool PID::Compute()
 {
+	double velocityAve = 0;
+	int i = 0;
    if(!inAuto) return false;
    unsigned long now = micros();
    unsigned long timeChange = (now - lastTime);
@@ -80,7 +88,26 @@ bool PID::Compute()
       else output = 0;
 
       /*Compute Rest of PID Output*/
-      output += outputSum - kd * dInput;
+	  if (velCounter >= 0) {	// if we haven't populated the entire array yet then use dInput as velocity
+		  output += outputSum - kd * dInput; // get the rest of pid output, using dInput for the D term
+		  velocity[velCounter] = dInput;
+		  velCounter--;
+	  }
+	  else {	// otherwise we compute average velocity from the array
+		  for (i == (VELOCTIY_ARRAY_SIZE - 2); i >= 0; i--) { // remove the oldest velocity
+			  velocity[i + 1] = velocity[i];
+		  }
+		  velocity[0] = dInput;	// move the new dInput into the velocity array
+
+		  for (i = 0; i < VELOCTIY_ARRAY_SIZE; i++) {	// compute average velocity from the array
+			  velocityAve += velocity[i];
+		  }
+		  velocityAve = velocityAve / VELOCTIY_ARRAY_SIZE;
+		  		  
+		  output += outputSum - kd * velocityAve; // get the rest of pid output, using velocityAve for the D term
+	  }
+
+      
 
 	    if(output > outMax) output = outMax;
       else if(output < outMin) output = outMin;

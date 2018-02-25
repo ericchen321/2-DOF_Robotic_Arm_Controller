@@ -18,6 +18,7 @@ class PID
   #define P_ON_E 1
   #define OUTPUT_LOWER_BOUND -255
   #define OUTPUT_UPPER_BOUND +255
+  #define VELOCTIY_ARRAY_SIZE 4
 
   //commonly used functions **************************************************************************
     PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
@@ -84,6 +85,8 @@ class PID
 			  
 	unsigned long lastTime;
 	double outputSum, lastInput;
+	double velocity[4];			 // used for computing moving average
+	int velCounter;
 
 	unsigned long SampleTime;
 	double outMin, outMax;
