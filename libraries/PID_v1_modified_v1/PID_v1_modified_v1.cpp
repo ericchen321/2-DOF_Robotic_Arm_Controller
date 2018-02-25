@@ -28,12 +28,12 @@ PID::PID(double* Input, double* Output, double* Setpoint,
     PID::SetOutputLimits(OUTPUT_LOWER_BOUND, OUTPUT_UPPER_BOUND);	//default output limit corresponds to
 																	// -255 to 255
 
-    SampleTime = 100;							//default Controller Sample Time is 0.1 seconds
+    SampleTime = 800;							//default Controller Sample Time is 800us
 
     PID::SetControllerDirection(ControllerDirection);
     PID::SetTunings(Kp, Ki, Kd, POn);
 
-    lastTime = millis()-SampleTime;
+    lastTime = micros()-SampleTime;
 }
 
 /*Constructor (...)*********************************************************
@@ -58,7 +58,7 @@ PID::PID(double* Input, double* Output, double* Setpoint,
 bool PID::Compute()
 {
    if(!inAuto) return false;
-   unsigned long now = millis();
+   unsigned long now = micros();
    unsigned long timeChange = (now - lastTime);
    if(timeChange>=SampleTime)
    {
@@ -129,7 +129,7 @@ void PID::SetTunings(double Kp, double Ki, double Kd){
 }
 
 /* SetSampleTime(...) *********************************************************
- * sets the period, in Milliseconds, at which the calculation is performed
+ * sets the period, in microseconds, at which the calculation is performed
  ******************************************************************************/
 void PID::SetSampleTime(int NewSampleTime)
 {

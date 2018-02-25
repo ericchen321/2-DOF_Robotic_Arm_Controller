@@ -1,6 +1,5 @@
 /* included necessary libraries */
 #include <PID_v1_modified_v1.h>
-#include <SetPoint.h>
 
 
 /* Define pins */
@@ -11,30 +10,19 @@
 #define ENCODER0_PINB  3
 
 /* Define other macros */
-#define SETPOINT_SIZE 126
-#define SETPOINT_TIME 0.008
-#define RADIUS 0.06
-#define HEIGHT 0.1
-#define FRAME_PER_SEC 10
 
 /* Define variables for the dual channel encoder reading algorithm */
 volatile signed long encoder0Pos = 0;
 
 
-/* Define x,y coordinate arrays */
-double desiredXArray[SETPOINT_SIZE];
-double desiredYArray[SETPOINT_SIZE];
-double desiredX;
-double desiredY;
+/* Define desired angles */
 double desiredYaw;
 double desiredPitch;
-unsigned char i = 0; // index for traversing desired Y array
 
 
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-double Kp=1.05, Ki=0.012, Kd=0;
-SetPoint mySetPoint(HEIGHT, SETPOINT_SIZE, desiredXArray, desiredYArray, &desiredX, &desiredY, &desiredYaw, &desiredPitch);
+double Kp=0.9, Ki=0.014, Kd=0.2;
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
 
 
@@ -63,41 +51,24 @@ void setup() {
   Serial.begin(2000000);
 
 
-  /* initialize desired x,y coordinates */
-  for (i = 0; i < SETPOINT_SIZE; i++){
-    desiredYArray[i] = i * SETPOINT_TIME;  
-  }
-  for (i = 0; i < SETPOINT_SIZE; i++){
-    desiredYArray[i] = RADIUS * sin ( 2 * 3.14 * FRAME_PER_SEC * desiredYArray[i] );
-  }
-  
-
   /* initialize actual and desired angle for the PID algorithm */
   encoder();
-  desiredPitch = 180;
+  desiredPitch = 30;
 
 
   /* turn the PID on */
   myPID.SetMode(AUTOMATIC);
+
+  delay(5000);
 }
 
 
 
 void loop() {
-  setPoint();
   encoder();
   myPID.Compute();
   motor();
   serialStuff() ;
-}
-
-
-
-/* manipulate set points */
-void setPoint () {
-  mySetPoint.LoadSetPoint();
-  mySetPoint.LoadKinParams();
-  mySetPoint.InverseKinY();
 }
 
 
@@ -125,6 +96,8 @@ void motor () {
 
 
 void serialStuff () {
+  Serial.print(millis());
+  Serial.print(",");
   Serial.print(desiredPitch);
   Serial.print(",");
   Serial.print(actualPitch);
