@@ -1,6 +1,6 @@
 /* included necessary libraries */
 #include <PID_v1_modified_v1.h>
-
+#include <TimerOne.h>
 
 /* Define pins */
 #define MOTOR0_ENA 9
@@ -22,7 +22,7 @@ double desiredPitch;
 
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-double Kp=0.9, Ki=0.014, Kd=0.2;
+double Kp=30, Ki=0.0028, Kd=12.8;
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
 
 
@@ -44,8 +44,9 @@ void setup() {
   /* Set initial rotation direction and pwm */
   digitalWrite(MOTOR0_IN1, HIGH);
   digitalWrite(MOTOR0_IN2, LOW);
-  analogWrite(MOTOR0_ENA, 0);
-
+  Timer1.initialize(500);                 // initialize timer1, and set a 2kHZ frequency
+  Timer1.pwm(MOTOR0_ENA, 0);              // setup pwm on MOTOR0_ENA, 0% duty cycle
+  Timer1.attachInterrupt(callback);       // attaches callback() as a timer overflow interrupt
 
   /* initialize serial communication */
   Serial.begin(2000000);
@@ -53,7 +54,7 @@ void setup() {
 
   /* initialize actual and desired angle for the PID algorithm */
   encoder();
-  desiredPitch = 30;
+  desiredPitch = 15;
 
 
   /* turn the PID on */
@@ -72,6 +73,14 @@ void loop() {
 }
 
 
+
+void callback()
+{
+  digitalWrite(10, digitalRead(10) ^ 1);
+}
+
+
+
 /* calculates the relative angle from the encoder's position count */
 void encoder () {
   actualPitch = encoder0Pos * 0.9;
@@ -84,12 +93,12 @@ void motor () {
   if ( pwmOutput < 0 ) {
     digitalWrite(MOTOR0_IN1, LOW);
     digitalWrite(MOTOR0_IN2, HIGH);
-    analogWrite(MOTOR0_ENA, (-1 * pwmOutput));
+    Timer1.pwm(MOTOR0_ENA, (-1*pwmOutput));;
   }
   else {
     digitalWrite(MOTOR0_IN1, HIGH);
     digitalWrite(MOTOR0_IN2, LOW);
-    analogWrite(MOTOR0_ENA, pwmOutput);
+    Timer1.pwm(MOTOR0_ENA, pwmOutput);;
   }
 
 }
@@ -98,9 +107,9 @@ void motor () {
 void serialStuff () {
   Serial.print(millis());
   Serial.print(",");
-  Serial.print(desiredPitch);
-  Serial.print(",");
   Serial.print(actualPitch);
+  Serial.print(",");
+  Serial.print(pwmOutput);
   Serial.println("");
 }
 

@@ -16,8 +16,8 @@ class PID
   #define REVERSE  1
   #define P_ON_M 0
   #define P_ON_E 1
-  #define OUTPUT_LOWER_BOUND -255
-  #define OUTPUT_UPPER_BOUND +255
+  #define OUTPUT_LOWER_BOUND -1023
+  #define OUTPUT_UPPER_BOUND +1023
   #define VELOCTIY_ARRAY_SIZE 4
 
   //commonly used functions **************************************************************************

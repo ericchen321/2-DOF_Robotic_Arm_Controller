@@ -1,23 +1,28 @@
-#define enA 9
-#define in1 6
-#define in2 7
-#define button 8
-
-int pwmOutput = 128;
-
-void setup() {
-  pinMode(enA, OUTPUT);
-  pinMode(in1, OUTPUT);
-  pinMode(in2, OUTPUT);
-
-  // Set initial rotation direction
-  digitalWrite(in1, HIGH);
-  digitalWrite(in2, LOW);
-
-  // pwmOutput = 255 correspond to 100% duty cycle
-  analogWrite(enA, pwmOutput); // Send PWM signal to L298N Enable pin
+/*
+ *  Timer1 library example
+ *  June 2008 | jesse dot tane at gmail dot com
+ */
+ 
+#include "TimerOne.h"
+ 
+void setup()
+{
+  pinMode(9, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
+  digitalWrite(6, HIGH);
+  digitalWrite(7, LOW);
+  Timer1.initialize(500);         // initialize timer1, and set period in us
+  Timer1.pwm(9, 200);                // setup pwm on pin 9, 50% duty cycle
+  Timer1.attachInterrupt(callback);  // attaches callback() as a timer overflow interrupt
 }
-
-void loop() {
-  ;
+ 
+void callback()
+{
+  digitalWrite(10, digitalRead(10) ^ 1);
+}
+ 
+void loop()
+{
+  // your program here...
 }

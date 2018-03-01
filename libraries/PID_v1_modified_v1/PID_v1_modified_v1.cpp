@@ -40,6 +40,8 @@ PID::PID(double* Input, double* Output, double* Setpoint,
 		velocity[i] = 0;
 	}
 	velCounter = VELOCTIY_ARRAY_SIZE - 1;	 // initialize counter used for indicating whether to use moving mean or not
+
+	outputSum = 0;
 }
 
 /*Constructor (...)*********************************************************

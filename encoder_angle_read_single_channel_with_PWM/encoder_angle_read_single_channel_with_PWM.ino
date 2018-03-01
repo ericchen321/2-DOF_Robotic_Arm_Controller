@@ -1,3 +1,5 @@
+#include <TimerOne.h>
+
 // encoder
 #define encoder0PinA  2
 #define encoder0PinB  3
@@ -9,7 +11,7 @@
 
 volatile signed long encoder0Pos = 0;
 volatile unsigned char flag = 0;
-int pwmOutput = 63; // pwmOutput = 255 correspond to 100% duty cycle
+int pwmOutput = 512; // pwmOutput = 1023 correspond to 100% duty cycle
 
 void setup() {
   // motor
@@ -19,7 +21,9 @@ void setup() {
   // Set initial rotation direction
   digitalWrite(in1, HIGH);
   digitalWrite(in2, LOW);
-  analogWrite(enA, pwmOutput); // Send PWM signal to L298N Enable pin
+  Timer1.initialize(5000);         // initialize timer1, and set period in us
+  Timer1.pwm(enA, pwmOutput);                // setup pwm on pin 9, and specify duty cycle
+  Timer1.attachInterrupt(callback);  // attaches callback() as a timer overflow interrupt
   
   // encoder
   pinMode(encoder0PinA, INPUT);
@@ -39,6 +43,12 @@ void loop() {
     Serial.print (encoder0Pos);
     Serial.println("");  
   }
+}
+
+
+void callback()
+{
+  digitalWrite(10, digitalRead(10) ^ 1);
 }
 
 
