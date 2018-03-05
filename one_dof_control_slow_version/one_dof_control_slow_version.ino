@@ -1,51 +1,48 @@
 /* included necessary libraries */
 #include <PID_v1_modified_v1.h>
-#include <SetPoint.h>
+#include <SetPoint_v1.h>
 
 
 /* Define pins */
 #define MOTOR0_ENA 9
 #define MOTOR0_IN1 6
 #define MOTOR0_IN2 7
-#define ENCODER0_PINA  22
-#define ENCODER0_PINB  24
+#define ENCODER0_PINA  2
+#define ENCODER0_PINB  3
 
 /* Define other macros */
 #define SETPOINT_SIZE 126
-#define SETPOINT_TIME 0.008
-#define RADIUS 0.1
+#define SETPOINT_TIME 0.08
+#define RADIUS 0.06
 #define HEIGHT 0.1
-#define FRAME_PER_SEC 10
+#define FRAME_PER_SEC 1
+#define SERIAL_PERIOD 10
 
 /* Define variables for the dual channel encoder reading algorithm */
 volatile signed long encoder0Pos = 0;
 
 
-/* Define x,y coordinate arrays and yaw, pitch angle arrays */
+/* Define x,y coordinate arrays */
 double desiredXArray[SETPOINT_SIZE];
 double desiredYArray[SETPOINT_SIZE];
-double desiredYawArray[SETPOINT_SIZE];
-double desiredPitchArray[SETPOINT_SIZE];
-double actualYawArray[2*SETPOINT_SIZE];
-double actualPitchArray[2*SETPOINT_SIZE];
 double desiredX;
 double desiredY;
 double desiredYaw;
 double desiredPitch;
 unsigned char i = 0; // index for traversing desired Y array
 
-/* For storeOutputs */
-unsigned char j = 0; // index for traversing actual pitch array
-signed long lastTime = 0;
-signed long currentTime = 0;
-
 
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-double Kp=1.5, Ki=0.012, Kd=0.5;
-SetPoint mySetPoint(HEIGHT, SETPOINT_SIZE, desiredXArray, desiredYArray, desiredYawArray, desiredPitchArray, &desiredX, &desiredY, &desiredYaw, &desiredPitch);
+double Kp=1.3, Ki=0.0087, Kd=15;
+SetPoint mySetPoint(HEIGHT, SETPOINT_SIZE, desiredXArray, desiredYArray, &desiredX, &desiredY, &desiredYaw, &desiredPitch);
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
 
+
+
+/* Define variables for serial */
+signed long currentTime = 0;
+signed long lastTime = 0;
 
 
 void setup() {
@@ -58,51 +55,49 @@ void setup() {
 
 
   /* initialize software interrupts */
-  attachInterrupt(digitalPinToInterrupt(ENCODER0_PINA), doEncoder0_A, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(ENCODER0_PINB), doEncoder0_B, CHANGE);
+  attachInterrupt(0, doEncoder0_A, CHANGE);
+  attachInterrupt(1, doEncoder0_B, CHANGE);
 
 
   /* Set initial rotation direction and pwm */
   digitalWrite(MOTOR0_IN1, HIGH);
   digitalWrite(MOTOR0_IN2, LOW);
-  analogWrite(MOTOR0_ENA, 90);
+  analogWrite(MOTOR0_ENA, 0);
 
 
   /* initialize serial communication */
-  Serial.begin(115200);
+  Serial.begin(2000000);
 
 
-  /* initialize desired y coordinates array*/
+  /* initialize desired x,y coordinates */
   for (i = 0; i < SETPOINT_SIZE; i++){
     desiredYArray[i] = i * SETPOINT_TIME;  
   }
   for (i = 0; i < SETPOINT_SIZE; i++){
     desiredYArray[i] = RADIUS * sin ( 2 * 3.14 * FRAME_PER_SEC * desiredYArray[i] );
   }
-
-  /* inverse kin - populated desired yaw angles array */
-  mySetPoint.InverseKinY();
   
 
-  /* initialize actual angle for the PID algorithm */
+  /* initialize actual and desired angle for the PID algorithm */
   encoder();
+  desiredPitch = 180;
 
 
   /* turn the PID on */
   myPID.SetMode(AUTOMATIC);
+
+  /* wait for a while */
+  delay(5000);
 }
 
 
 
 void loop() {
-  motor();
   setPoint();
   encoder();
   myPID.Compute();
-  /*
-  storeOutputs();
+  motor();
   serialStuff() ;
-  */
 }
 
 
@@ -110,6 +105,8 @@ void loop() {
 /* manipulate set points */
 void setPoint () {
   mySetPoint.LoadSetPoint();
+  mySetPoint.LoadKinParams();
+  mySetPoint.InverseKinY();
 }
 
 
@@ -136,28 +133,16 @@ void motor () {
 }
 
 
-void storeOutputs(){
-   currentTime = millis();
-   
-   if ((currentTime >= lastTime + 4) && j<(2*SETPOINT_SIZE)){
-    lastTime = currentTime; 
-    actualPitchArray[j] = actualPitch;
-    j++;
-   }
-}
-
-
 void serialStuff () {
-  if (j == 2*SETPOINT_SIZE){
-    for (j=0; j < 2*SETPOINT_SIZE; j++){
-      Serial.print(desiredPitchArray[j/2]);
-      Serial.print(",");
-      Serial.print(actualPitchArray[j]);
-      Serial.println("");
-    }
-    while(1);
-  }
+  currentTime = millis();
   
+  if (currentTime >= lastTime + SERIAL_PERIOD) {
+    Serial.print(desiredPitch);
+    Serial.print(",");
+    Serial.print(actualPitch);
+    Serial.println("");
+    lastTime = currentTime;
+  }
 }
 
 

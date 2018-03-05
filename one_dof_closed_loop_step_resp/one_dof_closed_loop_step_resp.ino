@@ -10,6 +10,7 @@
 #define ENCODER0_PINB  3
 
 /* Define other macros */
+#define SERIAL_RES 10
 
 /* Define variables for the dual channel encoder reading algorithm */
 volatile signed long encoder0Pos = 0;
@@ -22,9 +23,14 @@ double desiredPitch;
 
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-double Kp=30, Ki=0.0028, Kd=12.8;
+// double Kp=25, Ki=0.008, Kd=11;
+double Kp =64, Ki = 0.009, Kd=11;
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
 
+
+/* Define variables used for serialStuff */
+signed long currentTime = 0;
+signed long lastTime = 0;
 
 
 void setup() {
@@ -41,35 +47,35 @@ void setup() {
   attachInterrupt(1, doEncoder0_B, CHANGE);
 
 
+  /* initialize serial communication */
+  Serial.begin(2000000);
+  delay(5000);
+
+
   /* Set initial rotation direction and pwm */
   digitalWrite(MOTOR0_IN1, HIGH);
   digitalWrite(MOTOR0_IN2, LOW);
   Timer1.initialize(500);                 // initialize timer1, and set a 2kHZ frequency
-  Timer1.pwm(MOTOR0_ENA, 0);              // setup pwm on MOTOR0_ENA, 0% duty cycle
+  Timer1.pwm(MOTOR0_ENA, 500);              // setup initial pwm on MOTOR0_ENA
   Timer1.attachInterrupt(callback);       // attaches callback() as a timer overflow interrupt
 
-  /* initialize serial communication */
-  Serial.begin(2000000);
-
-
+  
   /* initialize actual and desired angle for the PID algorithm */
   encoder();
-  desiredPitch = 15;
+  desiredPitch = 5;
 
 
   /* turn the PID on */
   myPID.SetMode(AUTOMATIC);
-
-  delay(5000);
 }
 
 
 
 void loop() {
+  motor();
   encoder();
   myPID.Compute();
-  motor();
-  serialStuff() ;
+  serialStuff();
 }
 
 
@@ -105,12 +111,15 @@ void motor () {
 
 
 void serialStuff () {
-  Serial.print(millis());
-  Serial.print(",");
-  Serial.print(actualPitch);
-  Serial.print(",");
-  Serial.print(pwmOutput);
-  Serial.println("");
+  currentTime = millis();
+
+  if ( currentTime >= lastTime + SERIAL_RES){
+    Serial.print(desiredPitch);
+    Serial.print(",");
+    Serial.print(actualPitch);
+    Serial.println("");
+    lastTime = currentTime;
+  }
 }
 
 

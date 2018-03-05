@@ -7,16 +7,18 @@
 
 
 /* include header */
-#include <SetPoint.h>
+#include <SetPoint_v2.h>
 
 
 /* functions */
 // cosntructor: create hard links
-SetPoint::SetPoint(double InHeight, int InSetPointSize, double* InDesiredXArray, double* InDesiredYArray, double* InDesiredX, double* InDesiredY, double* InDesiredYaw, double* InDesiredPitch) {
+SetPoint::SetPoint(double InHeight, int InSetPointSize, double* InDesiredXArray, double* InDesiredYArray, double* InDesiredYawArray, double* InDesiredPitchArray, double* InDesiredX, double* InDesiredY, double* InDesiredYaw, double* InDesiredPitch) {
 	myHeight = InHeight;
 	mySetPointSize = InSetPointSize;
 	myDesiredXArray = InDesiredXArray;
 	myDesiredYArray = InDesiredYArray;
+	myDesiredYawArray = InDesiredYawArray;
+	myDesiredPitchArray = InDesiredPitchArray;
 	myDesiredX = InDesiredX;
 	myDesiredY = InDesiredY;
 	myDesiredYaw = InDesiredYaw;
@@ -24,14 +26,6 @@ SetPoint::SetPoint(double InHeight, int InSetPointSize, double* InDesiredXArray,
 	currentTime = 0;
 	lastTime = 0;
 	setPointCounter = 0;
-}
-
-// load coordinates and angles into the object
-void SetPoint::LoadKinParams() {
-	desiredX = *myDesiredX;
-	desiredY = *myDesiredY;
-	desiredYaw = *myDesiredYaw;
-	desiredPitch = *myDesiredPitch;
 }
 
 // convert deg to rad
@@ -45,11 +39,14 @@ void SetPoint::RadToDeg() {
 }
 
 // inverse kin on y axis: y coord -> pitch angle
-void SetPoint::InverseKinY() {	
-	angleInRad = atan2(desiredY, myHeight);
-	RadToDeg();
-	desiredPitch = angleInDeg;
-	*myDesiredPitch = desiredPitch;
+void SetPoint::InverseKinY() {
+	int i = 0;
+
+	for (i = 0; i < mySetPointSize; i++) {
+		angleInRad = atan2(myDesiredYArray[i], myHeight);
+		RadToDeg();
+		myDesiredPitchArray[i] = angleInDeg;
+	}
 }
 
 // Checking if the next set point should be loaded. If so load in the next set point from array
@@ -60,10 +57,10 @@ void SetPoint::LoadSetPoint() {
 		lastTime = currentTime;
 	}
 
-	if (setPointCounter > mySetPointSize) {
+	if (setPointCounter >= mySetPointSize) {
 		setPointCounter = 0;
 	}
 
-	*myDesiredX = *(myDesiredXArray + setPointCounter);
-	*myDesiredY = *(myDesiredYArray + setPointCounter);
+	*myDesiredYaw = myDesiredYawArray[setPointCounter];
+	*myDesiredPitch = myDesiredPitchArray[setPointCounter];
 }

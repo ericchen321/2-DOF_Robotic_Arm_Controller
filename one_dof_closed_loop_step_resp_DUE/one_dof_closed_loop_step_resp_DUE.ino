@@ -1,6 +1,5 @@
 /* included necessary libraries */
 #include <PID_v1_modified_v1.h>
-#include <TimerOne.h>
 
 /* Define pins */
 #define MOTOR0_ENA 9
@@ -20,9 +19,14 @@ double desiredYaw;
 double desiredPitch;
 
 
+/* Define variables for serialStuff */
+signed long currentTime = 0;
+signed long lastTime = 0;
+
+
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-double Kp=30, Ki=0.0028, Kd=12.8;
+double Kp=3, Ki=0.0028, Kd=12.8;
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
 
 
@@ -37,16 +41,14 @@ void setup() {
 
 
   /* initialize software interrupts */
-  attachInterrupt(0, doEncoder0_A, CHANGE);
-  attachInterrupt(1, doEncoder0_B, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ENCODER0_PINA), doEncoder0_A, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ENCODER0_PINB), doEncoder0_B, CHANGE);
 
 
   /* Set initial rotation direction and pwm */
   digitalWrite(MOTOR0_IN1, HIGH);
   digitalWrite(MOTOR0_IN2, LOW);
-  Timer1.initialize(500);                 // initialize timer1, and set a 2kHZ frequency
-  Timer1.pwm(MOTOR0_ENA, 0);              // setup pwm on MOTOR0_ENA, 0% duty cycle
-  Timer1.attachInterrupt(callback);       // attaches callback() as a timer overflow interrupt
+  analogWrite(MOTOR0_ENA, 90);
 
   /* initialize serial communication */
   Serial.begin(115200);
@@ -74,13 +76,6 @@ void loop() {
 
 
 
-void callback()
-{
-  digitalWrite(10, digitalRead(10) ^ 1);
-}
-
-
-
 /* calculates the relative angle from the encoder's position count */
 void encoder () {
   actualPitch = encoder0Pos * 0.9;
@@ -93,24 +88,28 @@ void motor () {
   if ( pwmOutput < 0 ) {
     digitalWrite(MOTOR0_IN1, LOW);
     digitalWrite(MOTOR0_IN2, HIGH);
-    Timer1.pwm(MOTOR0_ENA, (-1*pwmOutput));;
+    analogWrite(MOTOR0_ENA, (-1 * pwmOutput));
   }
   else {
     digitalWrite(MOTOR0_IN1, HIGH);
     digitalWrite(MOTOR0_IN2, LOW);
-    Timer1.pwm(MOTOR0_ENA, pwmOutput);;
+    analogWrite(MOTOR0_ENA, pwmOutput);
   }
 
 }
 
 
 void serialStuff () {
-  Serial.print(micros());
-  Serial.print(",");
-  Serial.print(actualPitch);
-  Serial.print(",");
-  Serial.print(pwmOutput);
-  Serial.println("");
+  currentTime = millis();
+  if (currentTime >= lastTime + 4) {  
+    Serial.print(currentTime);
+    Serial.print(",");
+    Serial.print(actualPitch);
+    Serial.print(",");
+    Serial.print(pwmOutput);
+    Serial.println("");
+    lastTime = currentTime;
+  }
 }
 
 
