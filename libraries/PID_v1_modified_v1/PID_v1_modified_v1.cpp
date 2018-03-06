@@ -28,7 +28,7 @@ PID::PID(double* Input, double* Output, double* Setpoint,
     PID::SetOutputLimits(OUTPUT_LOWER_BOUND, OUTPUT_UPPER_BOUND);	//default output limit corresponds to
 																	// -255 to 255
 
-    SampleTime = 800;							//default Controller Sample Time is 800us
+    SampleTime = 8000;							//default Controller Sample Time is 8ms
 
     PID::SetControllerDirection(ControllerDirection);
     PID::SetTunings(Kp, Ki, Kd, POn);
@@ -70,7 +70,7 @@ bool PID::Compute()
    if(!inAuto) return false;
    unsigned long now = micros();
    unsigned long timeChange = (now - lastTime);
-   if(timeChange>=SampleTime)
+   if(timeChange>=SampleTime || lastTime==0)
    {
       /*Compute all the working error variables*/
       double input = *myInput;
