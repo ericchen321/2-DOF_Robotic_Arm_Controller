@@ -14,10 +14,10 @@
 /* Define other macros */
 #define SETPOINT_SIZE 126
 #define SETPOINT_TIME 0.08
-#define RADIUS 0.06
+#define RADIUS 0.15
 #define HEIGHT 0.1
 #define FRAME_PER_SEC 1
-#define SERIAL_PERIOD 10
+#define SERIAL_PERIOD 40
 
 /* Define variables for the dual channel encoder reading algorithm */
 volatile signed long encoder0Pos = 0;
@@ -35,7 +35,8 @@ unsigned char i = 0; // index for traversing desired Y array
 
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-double Kp=8, Ki=0.06, Kd=25;
+double Ki=0.00, Kd=1.25;
+double Kp=7.45*Kd;
 SetPoint mySetPoint(HEIGHT, SETPOINT_SIZE, desiredXArray, desiredYArray, &desiredX, &desiredY, &desiredYaw, &desiredPitch);
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
 
