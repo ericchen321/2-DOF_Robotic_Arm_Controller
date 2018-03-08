@@ -37,8 +37,8 @@ unsigned char i = 0; // index for traversing desired Y array
 
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-double Ki=0, Kd=2.6;
-double Kp=13*Kd;
+double Ki=0, Kd=4.3;
+double Kp=8.518*Kd;
 SetPoint mySetPoint(HEIGHT, SETPOINT_SIZE, desiredXArray, desiredYArray, &desiredX, &desiredY, &desiredYaw, &desiredPitch);
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
 
@@ -91,7 +91,7 @@ void setup() {
 
   /* initialize actual and desired angle for the PID algorithm */
   actualPitch = 0;
-  desiredPitch = 180;
+  desiredPitch = 0;
 
 
   /* turn the PID on */
@@ -133,12 +133,12 @@ void motor () {
   if ( pwmOutput < 0 ) {
     digitalWrite(MOTOR0_IN1, LOW);
     digitalWrite(MOTOR0_IN2, HIGH);
-    Timer1.pwm(MOTOR0_ENA, (-1*6*pwmOutput));;
+    Timer1.pwm(MOTOR0_ENA, (-1*pwmOutput));;
   }
   else {
     digitalWrite(MOTOR0_IN1, HIGH);
     digitalWrite(MOTOR0_IN2, LOW);
-    Timer1.pwm(MOTOR0_ENA, 6*pwmOutput);;
+    Timer1.pwm(MOTOR0_ENA, pwmOutput);;
   }
 
 }
@@ -148,9 +148,9 @@ void serialStuff () {
   currentTime = millis();
   
   if (currentTime >= lastTime + SERIAL_PERIOD) {
-    Serial.print(desiredPitch);
-    Serial.print(",");
-   Serial.print(actualPitch);
+    //Serial.print(desiredPitch);
+    //Serial.print(",");
+   Serial.print(pwmOutput);
     Serial.println("");
     lastTime = currentTime;
   }

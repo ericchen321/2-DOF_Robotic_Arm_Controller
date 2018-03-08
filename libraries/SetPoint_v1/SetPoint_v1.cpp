@@ -55,7 +55,7 @@ void SetPoint::InverseKinY() {
 // Checking if the next set point should be loaded. If so load in the next set point from array
 void SetPoint::LoadSetPoint() {
 	currentTime = millis();
-	if (currentTime >= lastTime + SETPOINT_PERIOD) {
+	if (currentTime >= lastTime + SETPOINT_PERIOD || lastTime == 0) {
 		setPointCounter++;
 		lastTime = currentTime;
 	}
