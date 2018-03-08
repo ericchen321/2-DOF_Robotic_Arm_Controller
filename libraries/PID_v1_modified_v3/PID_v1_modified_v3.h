@@ -19,7 +19,7 @@ class PID
   #define OUTPUT_LOWER_BOUND -1023
   #define OUTPUT_UPPER_BOUND +1023
   #define VELOCTIY_ARRAY_SIZE 4
-  #define SAMPLE_TIME 8000 // sample time specified in micro seconds
+  #define SAMPLE_TIME 1000 // sample time specified in micro seconds
 
   //commonly used functions **************************************************************************
     PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 

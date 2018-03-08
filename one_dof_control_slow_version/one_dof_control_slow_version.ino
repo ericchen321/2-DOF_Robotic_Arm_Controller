@@ -13,10 +13,10 @@
 #define ENCODER0_PINB  3
 
 /* Define other macros */
-#define PID_SAMPLE_TIME 8 // PID Sample Time defined in ms
+#define PID_SAMPLE_TIME 1 // PID Sample Time defined in ms
 #define SETPOINT_SIZE 126
 #define SETPOINT_TIME 0.08
-#define RADIUS 0.1 // defined in m
+#define RADIUS 0.06 // defined in m
 #define HEIGHT 0.1 // defined in m
 #define FRAME_PER_SEC 1
 #define SERIAL_PERIOD 40  // specified in ms
@@ -37,8 +37,8 @@ unsigned char i = 0; // index for traversing desired Y array
 
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-double Ki=0, Kd=1.51;
-double Kp=8.518*Kd;
+double Ki=0, Kd=2.6;
+double Kp=13*Kd;
 SetPoint mySetPoint(HEIGHT, SETPOINT_SIZE, desiredXArray, desiredYArray, &desiredX, &desiredY, &desiredYaw, &desiredPitch);
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
 
@@ -90,7 +90,7 @@ void setup() {
   
 
   /* initialize actual and desired angle for the PID algorithm */
-  encoder();
+  actualPitch = 0;
   desiredPitch = 180;
 
 
@@ -99,7 +99,7 @@ void setup() {
   
 
   /* Set PID algorithm sampling time */
-  FlexiTimer2::set(PID_SAMPLE_TIME, PIDCompute);
+  FlexiTimer2::set(PID_SAMPLE_TIME, encoder);
   FlexiTimer2::start();
 }
 
@@ -107,7 +107,7 @@ void setup() {
 
 void loop() {
   setPoint();
-  encoder();
+  myPID.Compute();  
   motor();
   serialStuff();
 }
@@ -128,23 +128,17 @@ void encoder () {
 }
 
 
-void PIDCompute ( ){
-  myPID.Compute();  
-}
-
-
-
 /* set the rotation and pwm of the motor */
 void motor () {
   if ( pwmOutput < 0 ) {
     digitalWrite(MOTOR0_IN1, LOW);
     digitalWrite(MOTOR0_IN2, HIGH);
-    Timer1.pwm(MOTOR0_ENA, (-1*pwmOutput));;
+    Timer1.pwm(MOTOR0_ENA, (-1*6*pwmOutput));;
   }
   else {
     digitalWrite(MOTOR0_IN1, HIGH);
     digitalWrite(MOTOR0_IN2, LOW);
-    Timer1.pwm(MOTOR0_ENA, pwmOutput);;
+    Timer1.pwm(MOTOR0_ENA, 6*pwmOutput);;
   }
 
 }
@@ -156,7 +150,7 @@ void serialStuff () {
   if (currentTime >= lastTime + SERIAL_PERIOD) {
     Serial.print(desiredPitch);
     Serial.print(",");
-    Serial.print(actualPitch);
+   Serial.print(actualPitch);
     Serial.println("");
     lastTime = currentTime;
   }
