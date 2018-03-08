@@ -1,7 +1,8 @@
 /* included necessary libraries */
-#include <PID_v1_modified_v1.h>
+#include <PID_v1_modified_v3.h>
 #include <SetPoint_v1.h>
 #include <TimerOne.h>
+#include <FlexiTimer2.h>
 
 
 /* Define pins */
@@ -12,12 +13,13 @@
 #define ENCODER0_PINB  3
 
 /* Define other macros */
+#define PID_SAMPLE_TIME 8 // PID Sample Time defined in ms
 #define SETPOINT_SIZE 126
 #define SETPOINT_TIME 0.08
-#define RADIUS 0.1
-#define HEIGHT 0.1
+#define RADIUS 0.1 // defined in m
+#define HEIGHT 0.1 // defined in m
 #define FRAME_PER_SEC 1
-#define SERIAL_PERIOD 40
+#define SERIAL_PERIOD 40  // specified in ms
 
 /* Define variables for the dual channel encoder reading algorithm */
 volatile signed long encoder0Pos = 0;
@@ -35,7 +37,7 @@ unsigned char i = 0; // index for traversing desired Y array
 
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-double Ki=0, Kd=1.5;
+double Ki=0, Kd=1.51;
 double Kp=8.518*Kd;
 SetPoint mySetPoint(HEIGHT, SETPOINT_SIZE, desiredXArray, desiredYArray, &desiredX, &desiredY, &desiredYaw, &desiredPitch);
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
@@ -74,6 +76,10 @@ void setup() {
   Serial.begin(2000000);
 
 
+  /* wait for a while */
+  delay(5000);
+
+
   /* initialize desired x,y coordinates */
   for (i = 0; i < SETPOINT_SIZE; i++){
     desiredYArray[i] = i * SETPOINT_TIME;  
@@ -90,9 +96,11 @@ void setup() {
 
   /* turn the PID on */
   myPID.SetMode(AUTOMATIC);
+  
 
-  /* wait for a while */
-  delay(5000);
+  /* Set PID algorithm sampling time */
+  FlexiTimer2::set(PID_SAMPLE_TIME, PIDCompute);
+  FlexiTimer2::start();
 }
 
 
@@ -100,9 +108,8 @@ void setup() {
 void loop() {
   setPoint();
   encoder();
-  myPID.Compute();
   motor();
-  serialStuff() ;
+  serialStuff();
 }
 
 
@@ -118,6 +125,11 @@ void setPoint () {
 /* calculates the relative angle from the encoder's position count */
 void encoder () {
   actualPitch = encoder0Pos * 0.9;
+}
+
+
+void PIDCompute ( ){
+  myPID.Compute();  
 }
 
 
