@@ -80,8 +80,8 @@ class PID
                                   //   what these values are.  with pointers we'll just know.
 
 	double SampleTime;
-	double outputSum, lastInput;
-	double velocity[4];			 // used for computing moving average
+	double outputSum, lastError;
+	double velocity[VELOCTIY_ARRAY_SIZE];			 // used for computing moving average
 	int velCounter;
 
 	double outMin, outMax;

@@ -88,7 +88,7 @@ void loop() {
   encoder();
   myPID.Compute();
   motor();
-  serialStuff() ;
+  serialStuff();
 }
 
 

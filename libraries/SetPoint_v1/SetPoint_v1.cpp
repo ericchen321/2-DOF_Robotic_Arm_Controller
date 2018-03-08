@@ -56,7 +56,12 @@ void SetPoint::InverseKinY() {
 void SetPoint::LoadSetPoint() {
 	currentTime = millis();
 	if (currentTime >= lastTime + SETPOINT_PERIOD || lastTime == 0) {
-		setPointCounter++;
+		if (lastTime == 0) {
+			setPointCounter = 0;
+		}
+		else {
+			setPointCounter++;
+		}
 		lastTime = currentTime;
 	}
 

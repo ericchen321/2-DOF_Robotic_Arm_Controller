@@ -24,7 +24,6 @@ PID::PID(double* Input, double* Output, double* Setpoint,
     myInput = Input;
     mySetpoint = Setpoint;
     inAuto = false;
-
 	SampleTime = SAMPLE_TIME;
 
     PID::SetOutputLimits(OUTPUT_LOWER_BOUND, OUTPUT_UPPER_BOUND);	//default output limit corresponds to
@@ -33,13 +32,6 @@ PID::PID(double* Input, double* Output, double* Setpoint,
     PID::SetControllerDirection(ControllerDirection);
     PID::SetTunings(Kp, Ki, Kd, POn);
 
-	int i;										// initialize velocity array
-	for (i = 0; i < VELOCTIY_ARRAY_SIZE; i++) {
-		velocity[i] = 0;
-	}
-	velCounter = VELOCTIY_ARRAY_SIZE - 1;	 // initialize counter used for indicating whether to use moving mean or not
-
-	outputSum = 0;
 }
 
 /*Constructor (...)*********************************************************
@@ -70,11 +62,11 @@ bool PID::Compute()
     /*Compute all the working error variables*/
     double input = *myInput;
     double error = *mySetpoint - input;
-    double dInput = (input - lastInput);
-    outputSum+= (ki * error);
+    double dError = error - lastError;
+    outputSum += (ki * error);
 
     /*Add Proportional on Measurement, if P_ON_M is specified*/
-    if(!pOnE) outputSum-= kp * dInput;
+    if(!pOnE) outputSum-= kp * dError;
 
     if(outputSum > outMax) outputSum= outMax;
     else if(outputSum < outMin) outputSum= outMin;
@@ -85,23 +77,23 @@ bool PID::Compute()
     else output = 0;
 
     /*Compute Rest of PID Output*/
-	if (velCounter >= 0) {	// if we haven't populated the entire array yet then use dInput as velocity
-		output += outputSum - kd * dInput; // get the rest of pid output, using dInput for the D term
-		velocity[velCounter] = dInput;
+	if (velCounter >= 0) {	// if we haven't populated the entire array yet then use dError as velocity
+		output += outputSum + kd * dError; // get the rest of pid output, using dError for the D term
+		velocity[velCounter] = dError;
 		velCounter--;
 	}
 	else {	// otherwise we compute average velocity from the array
 		for (i == (VELOCTIY_ARRAY_SIZE - 2); i >= 0; i--) { // remove the oldest velocity
 			velocity[i + 1] = velocity[i];
 		}
-		velocity[0] = dInput;	// move the new dInput into the velocity array
+		velocity[0] = dError;	// move the new dError into the velocity array
 
 		for (i = 0; i < VELOCTIY_ARRAY_SIZE; i++) {	// compute average velocity from the array
 			velocityAve += velocity[i];
 		}
 		velocityAve = velocityAve / VELOCTIY_ARRAY_SIZE;
 		  		  
-		output += outputSum - kd * velocityAve; // get the rest of pid output, using velocityAve for the D term
+		output += outputSum + kd * velocityAve; // get the rest of pid output, using velocityAve for the D term
 	}
 	      
 
@@ -110,7 +102,7 @@ bool PID::Compute()
 	*myOutput = output;
 
     /*Remember some variables for next time*/
-    lastInput = input;
+    lastError = error;
 	return true;
 }
 
@@ -197,8 +189,15 @@ void PID::SetMode(int Mode)
  ******************************************************************************/
 void PID::Initialize()
 {
-   outputSum = *myOutput;
-   lastInput = *myInput;
+	int i;										// initialize velocity array
+	for (i = 0; i < VELOCTIY_ARRAY_SIZE; i++) {
+		velocity[i] = 0;
+	}
+
+	velCounter = VELOCTIY_ARRAY_SIZE - 1;	 // initialize counter used for indicating whether to use moving mean or not
+
+   outputSum = 0;
+   lastError = 0;
    if(outputSum > outMax) outputSum = outMax;
    else if(outputSum < outMin) outputSum = outMin;
 }

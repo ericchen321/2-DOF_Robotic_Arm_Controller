@@ -37,7 +37,7 @@ unsigned char i = 0; // index for traversing desired Y array
 
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-double Ki=0, Kd=3.6;
+double Ki=0, Kd=1.36;
 double Kp=8.518*Kd;
 SetPoint mySetPoint(HEIGHT, SETPOINT_SIZE, desiredXArray, desiredYArray, &desiredX, &desiredY, &desiredYaw, &desiredPitch);
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
@@ -91,7 +91,7 @@ void setup() {
 
   /* initialize actual and desired angle for the PID algorithm */
   actualPitch = 0;
-  desiredPitch = 0;
+  desiredPitch = 15;
 
 
   /* turn the PID on */
@@ -106,7 +106,6 @@ void setup() {
 
 
 void loop() {
-  setPoint();
   myPID.Compute();  
   motor();
   serialStuff();
