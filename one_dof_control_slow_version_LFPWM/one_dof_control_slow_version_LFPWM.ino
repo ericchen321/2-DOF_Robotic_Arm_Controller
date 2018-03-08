@@ -1,7 +1,6 @@
 /* included necessary libraries */
-#include <PID_v1_modified_v1.h>
+#include <PID_v1_modified_v2.h>
 #include <SetPoint_v1.h>
-#include <TimerOne.h>
 
 
 /* Define pins */
@@ -35,7 +34,7 @@ unsigned char i = 0; // index for traversing desired Y array
 
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-double Ki=0, Kd=1.5;
+double Ki=0, Kd=0.179;
 double Kp=8.518*Kd;
 SetPoint mySetPoint(HEIGHT, SETPOINT_SIZE, desiredXArray, desiredYArray, &desiredX, &desiredY, &desiredYaw, &desiredPitch);
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
@@ -64,9 +63,7 @@ void setup() {
   /* Set initial rotation direction and pwm */
   digitalWrite(MOTOR0_IN1, HIGH);
   digitalWrite(MOTOR0_IN2, LOW);
-  Timer1.initialize(200);                 // initialize timer1, and set a 5kHZ frequency
-  Timer1.pwm(MOTOR0_ENA, 0);              // setup initial pwm on MOTOR0_ENA
-  Timer1.attachInterrupt(callback);       // attaches callback() as a timer overflow interrupt
+  analogWrite(MOTOR0_ENA, 0);              // setup initial pwm on MOTOR0_ENA
 
 
 
@@ -127,12 +124,12 @@ void motor () {
   if ( pwmOutput < 0 ) {
     digitalWrite(MOTOR0_IN1, LOW);
     digitalWrite(MOTOR0_IN2, HIGH);
-    Timer1.pwm(MOTOR0_ENA, (-1*pwmOutput));;
+    analogWrite(MOTOR0_ENA, (-1*pwmOutput));;
   }
   else {
     digitalWrite(MOTOR0_IN1, HIGH);
     digitalWrite(MOTOR0_IN2, LOW);
-    Timer1.pwm(MOTOR0_ENA, pwmOutput);;
+    analogWrite(MOTOR0_ENA, pwmOutput);;
   }
 
 }
@@ -201,12 +198,5 @@ void doEncoder0_B() {
       encoder0Pos = encoder0Pos - 1;          // CCW
     }
   }
-}
-
-
-
-void callback()
-{
-  digitalWrite(10, digitalRead(10) ^ 1);
 }
 

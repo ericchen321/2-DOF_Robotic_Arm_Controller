@@ -23,8 +23,8 @@ double desiredPitch;
 
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-// double Kp=25, Ki=0.008, Kd=11;
-double Kp =64, Ki = 0.009, Kd=11;
+double Ki=0, Kd=3.8;
+double Kp=8.518*Kd;
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
 
 
@@ -55,14 +55,14 @@ void setup() {
   /* Set initial rotation direction and pwm */
   digitalWrite(MOTOR0_IN1, HIGH);
   digitalWrite(MOTOR0_IN2, LOW);
-  Timer1.initialize(500);                 // initialize timer1, and set a 2kHZ frequency
-  Timer1.pwm(MOTOR0_ENA, 500);              // setup initial pwm on MOTOR0_ENA
+  Timer1.initialize(200);                 // initialize timer1, and set a 5kHZ frequency
+  Timer1.pwm(MOTOR0_ENA, 0);              // setup initial pwm on MOTOR0_ENA
   Timer1.attachInterrupt(callback);       // attaches callback() as a timer overflow interrupt
 
   
   /* initialize actual and desired angle for the PID algorithm */
   encoder();
-  desiredPitch = 5;
+  desiredPitch = 15;
 
 
   /* turn the PID on */
@@ -72,10 +72,10 @@ void setup() {
 
 
 void loop() {
-  motor();
   encoder();
   myPID.Compute();
-  serialStuff();
+  motor();
+  // serialStuff();
 }
 
 
@@ -113,8 +113,8 @@ void motor () {
 void serialStuff () {
   currentTime = millis();
 
-  if ( currentTime >= lastTime + SERIAL_RES){
-    Serial.print(desiredPitch);
+  if ( currentTime >= lastTime + SERIAL_RES || lastTime == 0){
+    Serial.print(currentTime);
     Serial.print(",");
     Serial.print(actualPitch);
     Serial.println("");
