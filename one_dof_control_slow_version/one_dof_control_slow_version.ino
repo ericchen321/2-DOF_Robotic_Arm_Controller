@@ -37,7 +37,7 @@ unsigned char i = 0; // index for traversing desired Y array
 
 /* Define control variables for the PID and initialze all PID related stuff */
 double actualPitch, pwmOutput;
-double Ki=0, Kd=3.6;
+double Ki=0, Kd=6;
 double Kp=8.518*Kd;
 SetPoint mySetPoint(HEIGHT, SETPOINT_SIZE, desiredXArray, desiredYArray, &desiredX, &desiredY, &desiredYaw, &desiredPitch);
 PID myPID(&actualPitch, &pwmOutput, &desiredPitch, Kp, Ki, Kd, DIRECT);
@@ -148,9 +148,9 @@ void serialStuff () {
   currentTime = millis();
   
   if (currentTime >= lastTime + SERIAL_PERIOD) {
-    //Serial.print(desiredPitch);
-    //Serial.print(",");
-    Serial.print(pwmOutput);
+    Serial.print(desiredPitch);
+    Serial.print(",");
+    Serial.print(actualPitch);
     Serial.println("");
     lastTime = currentTime;
   }
