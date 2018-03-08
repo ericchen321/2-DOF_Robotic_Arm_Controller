@@ -21,7 +21,7 @@ void setup() {
   // Set initial rotation direction
   digitalWrite(in1, HIGH);
   digitalWrite(in2, LOW);
-  Timer1.initialize(5000);         // initialize timer1, and set period in us
+  Timer1.initialize(200);         // initialize timer1, and set period in us
   Timer1.pwm(enA, pwmOutput);                // setup pwm on pin 9, and specify duty cycle
   Timer1.attachInterrupt(callback);  // attaches callback() as a timer overflow interrupt
   
