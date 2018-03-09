@@ -12,8 +12,8 @@ void setup()
   pinMode(7, OUTPUT);
   digitalWrite(6, HIGH);
   digitalWrite(7, LOW);
-  Timer1.initialize(500);         // initialize timer1, and set period in us
-  Timer1.pwm(9, 200);                // setup pwm on pin 9, 50% duty cycle
+  Timer1.initialize(200);         // initialize timer1, and set period in us
+  Timer1.pwm(9, 512);                // setup pwm on pin 9, 50% duty cycle
   Timer1.attachInterrupt(callback);  // attaches callback() as a timer overflow interrupt
 }
  
