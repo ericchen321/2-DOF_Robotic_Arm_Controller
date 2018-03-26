@@ -1,8 +1,8 @@
 /* included necessary libraries */
-#include <PID_v1_modified_v3.h>
+#include <PID_v1_modified_v3.h> // used library found on https://playground.arduino.cc/Code/PIDLibrary
 #include <SetPoint_v1.h>
-#include <TimerOne.h>
-#include <FlexiTimer2.h>
+#include <TimerOne.h> // used library found on https://playground.arduino.cc/Code/Timer1
+#include <FlexiTimer2.h> // used library found on https://playground.arduino.cc/Main/FlexiTimer2
 
 
 /* Define pins */
@@ -148,8 +148,8 @@ void serialStuff () {
   currentTime = millis();
   
   if (currentTime >= lastTime + SERIAL_PERIOD) {
-    Serial.print(desiredPitch);
-    Serial.print(",");
+    //Serial.print(desiredPitch);
+    //Serial.print(",");
     Serial.print(actualPitch);
     Serial.println("");
     lastTime = currentTime;

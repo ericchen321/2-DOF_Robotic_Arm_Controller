@@ -1,0 +1,22 @@
+#######################################
+# Syntax Coloring Map For PID Library
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+PID	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+Compute	KEYWORD2
+SetTunings	KEYWORD2
+SetSampleTime	KEYWORD2
+GetKp	KEYWORD2
+GetKi	KEYWORD2
+GetKd	KEYWORD2
+GetMode	KEYWORD2
+GetDirection  KEYWORD2

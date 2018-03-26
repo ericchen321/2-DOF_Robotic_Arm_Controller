@@ -67,8 +67,8 @@ void encoder () {
   if((encoder0Pos % 4) == 0) {
     Serial.print (encoder0Pos);
     Serial.print (",");
-    Currenttime = micros();
-    Serial.print (Currenttime);  
+    //Currenttime = micros();
+    //Serial.print (Currenttime);  
     Serial.println ("");
   }
   
