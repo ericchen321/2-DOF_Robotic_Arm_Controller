@@ -1,4 +1,4 @@
-#include <MegaEncoderCounter_v2.h>
+#include <MegaEncoderCounter_v3.h>
 
 MEGAEncoderCounter MegaEncoderCounter; // Initializes the MEGA Encoder Counter
 
@@ -14,10 +14,9 @@ void setup()
 
 void loop() 
 {  
+    
    count = MegaEncoderCounter.YAxisGetCount();
-   //Serial.print(millis());
-   //Serial.print(",");
-   Serial.print(count);
-   Serial.println("");
+   Serial.println(count);
    delay(10);
+   
 }

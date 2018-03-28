@@ -1,13 +1,13 @@
 /* included necessary libraries */
 #include <PID_v1_modified_v4.h>         // modified based on library found on https://playground.arduino.cc/Code/PIDLibrary
 #include <SetPoint_v3.h>
-#include <TimerOne.h>                   // used library found on https://playground.arduino.cc/Code/Timer1
+#include <TimerOne_v2.h>                // modified based on library found on https://playground.arduino.cc/Code/Timer1
 #include <FlexiTimer2.h>                // used library found on https://playground.arduino.cc/Main/FlexiTimer2
-#include <MegaEncoderCounter_v2.h>      // modified based on library found on https://www.robogaia.com/two-axis-encoder-counter-mega-shield.html 
+#include <MegaEncoderCounter_v3.h>      // modified based on library found on https://www.robogaia.com/two-axis-encoder-counter-mega-shield.html 
 
 
 /* Define pins */
-#define MOTOR0_ENA 9
+#define MOTOR0_ENA 11
 #define MOTOR0_IN1 6
 #define MOTOR0_IN2 7
 
@@ -70,7 +70,6 @@ void setup() {
   digitalWrite(MOTOR0_IN2, LOW);
   Timer1.initialize(PWM_PERIOD);                 // initialize timer1, and set frequency based on period defined
   Timer1.pwm(MOTOR0_ENA, 0);                     // setup initial pwm on MOTOR0_ENA
-  Timer1.attachInterrupt(callback);              // attaches callback() as a timer overflow interrupt
 
   /* initialize serial communication */
   Serial.begin(SERIAL_BAUD_RATE);

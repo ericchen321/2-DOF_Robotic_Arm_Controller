@@ -83,19 +83,19 @@ void TimerOne::setPwmDuty(char pin, int duty)
   
   oldSREG = SREG;
   cli();
-  if(pin == 1 || pin == 9)       OCR1A = dutyCycle;
-  else if(pin == 2 || pin == 10) OCR1B = dutyCycle;
+  if(pin == 1 || pin == 11)       OCR1A = dutyCycle;
+  else if(pin == 2 || pin == 12) OCR1B = dutyCycle;
   SREG = oldSREG;
 }
 
 void TimerOne::pwm(char pin, int duty, long microseconds)  // expects duty cycle to be 10 bit (1024)
 {
   if(microseconds > 0) setPeriod(microseconds);
-  if(pin == 1 || pin == 9) {
+  if(pin == 1 || pin == 11) {
     DDRB |= _BV(PORTB1);                                   // sets data direction register for pwm output pin
     TCCR1A |= _BV(COM1A1);                                 // activates the output pin
   }
-  else if(pin == 2 || pin == 10) {
+  else if(pin == 2 || pin == 12) {
     DDRB |= _BV(PORTB2);
     TCCR1A |= _BV(COM1B1);
   }
@@ -106,8 +106,8 @@ void TimerOne::pwm(char pin, int duty, long microseconds)  // expects duty cycle
 
 void TimerOne::disablePwm(char pin)
 {
-  if(pin == 1 || pin == 9)       TCCR1A &= ~_BV(COM1A1);   // clear the bit that enables pwm on PB1
-  else if(pin == 2 || pin == 10) TCCR1A &= ~_BV(COM1B1);   // clear the bit that enables pwm on PB2
+  if(pin == 1 || pin == 11)       TCCR1A &= ~_BV(COM1A1);   // clear the bit that enables pwm on PB1
+  else if(pin == 2 || pin == 12) TCCR1A &= ~_BV(COM1B1);   // clear the bit that enables pwm on PB2
 }
 
 void TimerOne::attachInterrupt(void (*isr)(), long microseconds)
