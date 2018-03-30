@@ -24,28 +24,27 @@
  *	  parameter: the flag which indicates a new output should be computed
  *    output:	 void
  ***************************************************************************/
-PID::PID(float* Input, float* Output, float* Setpoint, int* ComputeFlag,
-        float Kp, float Ki, float Kd, float PIDSampleTime)
+PID::PID(float* Input, float* Output, float* Setpoint, float Kp, float Ki, float Kd, int* errorClear, int PIDSampleTime)
 {
 	myInput = Input;
     myOutput = Output;
     mySetpoint = Setpoint;
-	myComputeFlag = ComputeFlag;
-
-    PID::SetTunings(Kp, Ki, Kd);
+	myErrorClear = errorClear;
 	pidSampleTime = PIDSampleTime;
 
-	int i;										// initialize velocity array
-	for (i = 0; i < VELOCTIY_ARRAY_SIZE; i++) {
-		velocity[i] = 0;
-	}
-
-	velCounter = VELOCTIY_ARRAY_SIZE - 1;	 // initialize counter used for indicating whether to use moving mean or not
+    PID::SetTunings(Kp, Ki, Kd);
 
 	iTerm = 0;
 	lastError = 0;
-	if (iTerm > OUT_MAX) iTerm = OUT_MAX;
-	else if (iTerm < OUT_MIN) iTerm = OUT_MIN;
+
+	/*
+	int i;										// initialize derivArray array
+	for (i = 0; i < DERIV_ARRAY_SIZE; i++) {
+		derivArray[i] = 0;
+	}
+
+	derivCounter = DERIV_ARRAY_SIZE - 1;	 // initialize counter used for indicating whether to use moving mean or not
+	*/
 }
 
 /* SetTunings(...)*************************************************************
@@ -56,7 +55,7 @@ void PID::SetTunings(float Kp, float Ki, float Kd)
 
 	dispKp = Kp; dispKi = Ki; dispKd = Kd;
 
-	float SampleTimeInSec = ((float)pidSampleTime) / 1000;
+	float SampleTimeInSec = (float)pidSampleTime / 1000;
 	kp = Kp;
 	ki = Ki * SampleTimeInSec;
 	kd = Kd / SampleTimeInSec;
@@ -64,12 +63,12 @@ void PID::SetTunings(float Kp, float Ki, float Kd)
 
 /* Compute() **********************************************************************
  * computes output based on a bunch of stuff
- * parameter: computeFlag, which is asserted by Timer and deasserted by Compute()
+ * parameter: none
  * output:    a bool which indicates if a new output has been computed or not
  **********************************************************************************/
 bool PID::Compute()
 {
-	float velocityAve = 0;
+	float derivAve = 0;
 	float input;
 	float output;
 	float error;
@@ -78,61 +77,59 @@ bool PID::Compute()
 	float dTerm;
 	int i = 0;
 
-	if (*(myComputeFlag) == 1)
-	{
-		/*Compute all the working error variables*/
-		input = *myInput;
-		error = *mySetpoint - input;
-		dError = error - lastError;
-
-		/*Compute the integral term*/
-		iTerm = iTerm + (ki * error);
-		if (iTerm > OUT_MAX) iTerm = OUT_MAX;
-		else if (iTerm < OUT_MIN) iTerm = OUT_MIN;
-
-		/*Compute the proportional term*/
-		pTerm = kp * error;
-
-		/*Compute the derivative term*/
-		if (velCounter >= 0)	// if we haven't populated the entire array yet then use dError as velocity
-		{
-			dTerm = kd * dError; // use dError for the D term
-			velocity[velCounter] = dError;
-			velCounter--;
-		}
-		else		// otherwise we compute average velocity from the array
-		{
-			for (i == (VELOCTIY_ARRAY_SIZE - 2); i >= 0; i--) { // remove the oldest velocity
-				velocity[i + 1] = velocity[i];
-			}
-			velocity[0] = dError;	// move the new dError into the velocity array
-
-			for (i = 0; i < VELOCTIY_ARRAY_SIZE; i++) {	// compute average velocity from the array
-				velocityAve += velocity[i];
-			}
-			velocityAve = velocityAve / VELOCTIY_ARRAY_SIZE;
-
-			dTerm = kd * velocityAve; // use velocityAve for the D term
-		}
-
-		/*sums up the three terms to get the output*/
-		output = iTerm + pTerm + dTerm;
-		if (output > OUT_MAX) output = OUT_MAX;
-		else if (output < OUT_MIN) output = OUT_MIN;
-		*myOutput = output;
-
-		/*Remember some variables for next time*/
-		lastError = error;
-
-		/*Deassert the compute flag*/
-		*(myComputeFlag) = 0;
-
-		return true;
+	/*Check if lastError and iTerm should be resetted*/
+	if (*myErrorClear == 1) {
+		iTerm = 0;
+		lastError = 0;
+		*myErrorClear = 0;
 	}
-	else 
+
+	/*Compute all the working error variables*/
+	input = *myInput;
+	error = *mySetpoint - input;
+	dError = error - lastError;
+
+	/*Compute the integral term*/
+	iTerm = iTerm + (ki * error);
+
+	/*Compute the proportional term*/
+	pTerm = kp * error;
+
+	/*Compute the derivative term*/
+	/*
+	if (derivCounter >= 0)	// if we haven't populated the entire array yet then use dError as derivArray
 	{
-		return false;
+	dTerm = kd * dError; // use dError for the D term
+	derivArray[derivCounter] = dError;
+	derivCounter--;
 	}
+	else		// otherwise we compute average derivArray from the array
+	{
+	for (i == (DERIV_ARRAY_SIZE - 2); i >= 0; i--) { // remove the oldest derivArray
+	derivArray[i + 1] = derivArray[i];
+	}
+	derivArray[0] = dError;	// move the new dError into the derivArray array
+
+	for (i = 0; i < DERIV_ARRAY_SIZE; i++) {	// compute average derivArray from the array
+	derivAve += derivArray[i];
+	}
+	derivAve = derivAve / DERIV_ARRAY_SIZE;
+
+	dTerm = kd * derivAve; // use derivAve for the D term
+	}
+	*/
+	dTerm = kd * dError;
+
+	/*sums up the three terms to get the output*/
+	output = iTerm + pTerm + dTerm;
+	if (output > OUT_MAX) output = OUT_MAX;
+	else if (output < OUT_MIN) output = OUT_MIN;
+	*myOutput = output;
+
+	/*Remember some variables for next time*/
+	lastError = error;
+
+	return true;
 }
 
 /* Status Funcions*************************************************************

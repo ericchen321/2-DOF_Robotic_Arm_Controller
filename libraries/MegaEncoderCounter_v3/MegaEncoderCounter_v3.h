@@ -13,20 +13,26 @@ class MEGAEncoderCounter
 {
    public:
 	  MEGAEncoderCounter();
-      void YAxisReset( );
-      unsigned long YAxisGetCount( );
+      void YawReset();
+      unsigned long YawGetCount();
+	  void PitchReset();
+	  unsigned long PitchGetCount();
 
    private:
       unsigned long count;
       unsigned char busByte;
-	  unsigned char dataBit;
 };
 
 
 
-#define CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1 42
-#define CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2 43
-#define CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_RSTY 47 // Active LOW
-#define CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_OE   48 // Active LOW
+#define CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1 38
+#define CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2 39
+#define CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_RSTY 40 // Active LOW
+#define CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_OE   41 // Active LOW
+
+#define CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1 42
+#define CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2 43
+#define CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_RSTY 47 // Active LOW
+#define CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_OE   48 // Active LOW
 
 #endif

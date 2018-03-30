@@ -10,13 +10,16 @@ class PID
   //Constants used in some of the functions below
   #define OUT_MIN -1023
   #define OUT_MAX +1023
-  #define VELOCTIY_ARRAY_SIZE 4
+  #define DERIV_ARRAY_SIZE 4
 
   //commonly used functions **************************************************************************
-    PID(float*, float*, float*, int*, float, float, float, float);		// * constructor         				
+    PID(float*, float*, float*, float, float, float, int*, int);		// * constructor         				
 
     bool Compute();                       // * performs the PID calculation, takes a flag input which
 											 // indicates a new output should be computed
+
+	bool ComputePitch();					// Compute() function for dual axes control
+	bool ComputeYaw();						// Compute() function for dual axies control
 
 
   //available but not commonly used functions ********************************************************
@@ -41,20 +44,20 @@ class PID
 	float kp;                  // * (P)roportional Tuning Parameter
     float ki;                  // * (I)ntegral Tuning Parameter
     float kd;                  // * (D)erivative Tuning Parameter
-	float pidSampleTime;
+	
+	int pidSampleTime;
+
+	int *myErrorClear;
 
     float *myInput;              // * Pointers to the Input, Output, and Setpoint variables
     float *myOutput;             //   This creates a hard link between the variables and the 
     float *mySetpoint;           //   PID, freeing the user from having to constantly tell us
                                   //   what these values are.  with pointers we'll just know.
 
-	int *myComputeFlag;			// the flag is asserted by Timer every (pidSampleTime)ms and 
-								// should be deasserted by Compute()
-
 	float iTerm; 
 	float lastError;
-	float velocity[VELOCTIY_ARRAY_SIZE];			 // used for computing moving average
-	int velCounter;
+	float derivArray[DERIV_ARRAY_SIZE];			 // used for computing moving average
+	int derivCounter;
 };
 #endif
 
