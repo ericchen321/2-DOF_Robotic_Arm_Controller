@@ -3,19 +3,17 @@
 
 MEGAEncoderCounter MegaEncoderCounter; // Initializes the MEGA Encoder Counter
 
-signed long count = 0;
+int count = 0;
 
 void setup()
 {
 
-  MegaEncoderCounter.PitchReset();
-  
   /* Turn on serial */
   Serial.begin(115200);
 }
 
 void loop() 
 {  
-  count = MegaEncoderCounter.PitchGetCount();
+  count = MegaEncoderCounter.YawGetCount();
   Serial.println(count);
 }
