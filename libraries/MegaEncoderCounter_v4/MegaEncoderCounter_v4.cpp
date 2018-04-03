@@ -3,10 +3,11 @@
 /* No stupid legalize, no warranty expressed or implied. */
 /* This software is for those who love to create instead of bicker and hamper innovation. */
 /* Author: Andrew Jalics */
+/* Modified by: Eric Chen*/
 
-/* Please see header file (MegaEncoderCounter_v2.h) and Avago HCTL-2022 Datasheet for more technical details */
+/* Please see header file (MegaEncoderCounter_v4.h) and Avago HCTL-2022 Datasheet for more technical details */
 
-#include "MegaEncoderCounter_v3.h"
+#include "MegaEncoderCounter_v4.h"
 
 MEGAEncoderCounter::MEGAEncoderCounter()
 {
@@ -43,6 +44,7 @@ MEGAEncoderCounter::MEGAEncoderCounter()
    digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, LOW);
    digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, HIGH);
    digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_RSTY, HIGH);  // Active LOW
+   delayMicroseconds(1);
    PitchReset();
 }
 
@@ -52,7 +54,7 @@ MEGAEncoderCounter::MEGAEncoderCounter()
 
 // Communicates with a HCTL-2022 IC to get reset the Yaw encoder count
 // see Avago/Agilent/HP HCTL-2022 PDF for details
-void MEGAEncoderCounter::YawReset( )
+void MEGAEncoderCounter::YawReset()
 {
    digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_RSTY, LOW);
    delayMicroseconds(1);
@@ -65,35 +67,37 @@ void MEGAEncoderCounter::YawReset( )
 
 // Communicates with a HCTL-2022 IC to get the Y Axis encoder count via an 8bit parallel bus
 // see Avago/Agilent/HP HCTL-2022 PDF for details
-unsigned long MEGAEncoderCounter::YawGetCount( )
+unsigned long MEGAEncoderCounter::YawGetCount()
 {
    digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_OE,   LOW);
+   
+   
    digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, LOW);
    digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, HIGH);
    delayMicroseconds(1);
    busByte = PINA;
-   count   = busByte;
+   count = busByte;
    count <<= 8;
 
    digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, HIGH);
    digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, HIGH);
    delayMicroseconds(1);
    busByte = PINA;
-   count  = count | busByte;
+   count  += busByte;
    count <<= 8;
-
+   
    digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, LOW);
    digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, LOW);
    delayMicroseconds(1);
    busByte = PINA;
-   count  = count | busByte;
+   count  += busByte;
    count <<= 8;
 
    digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, HIGH);
    digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, LOW);
    delayMicroseconds(1);
    busByte = PINA;
-   count  = count | busByte;
+   count  += busByte;
 
    digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_OE,  HIGH);
 
@@ -107,10 +111,11 @@ unsigned long MEGAEncoderCounter::YawGetCount( )
 // see Avago/Agilent/HP HCTL-2022 PDF for details
 void MEGAEncoderCounter::PitchReset()
 {
+	
 	digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_RSTY, LOW);
-	delayMicroseconds(10);
+	delayMicroseconds(100);
 	digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_RSTY, HIGH);
-	delayMicroseconds(1);
+	delayMicroseconds(10);
 }
 
 
@@ -119,36 +124,37 @@ void MEGAEncoderCounter::PitchReset()
 // see Avago/Agilent/HP HCTL-2022 PDF for details
 unsigned long MEGAEncoderCounter::PitchGetCount()
 {
-	digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_OE, LOW);
+	count = 0; // initialize count
 
-	digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, LOW);
-	digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, HIGH);
-	delayMicroseconds(1);
+	PORTL &= B11111101; //digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_OE, LOW);
+	delayMicroseconds(10);
+
+	PORTL &= B01111111; //digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, LOW);
+	PORTL |= B01000000; //digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, HIGH);
 	busByte = PINC;
 	count = busByte;
 	count <<= 8;
-
-	digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, HIGH);
-	digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, HIGH);
-	delayMicroseconds(1);
+		
+	PORTL |= B10000000; //digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, HIGH);
+	PORTL |= B01000000; //digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, HIGH);
 	busByte = PINC;
-	count = count | busByte;
+	count += busByte;
+	count <<= 8;
+	
+	PORTL &= B01111111; //digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, LOW);
+	PORTL &= B10111111; //digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, LOW);
+	delayMicroseconds(100);
+	busByte = PINC;
+	count += busByte;
 	count <<= 8;
 
-	digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, LOW);
-	digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, LOW);
-	delayMicroseconds(1);
+	PORTL |= B10000000; //digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, HIGH);
+	PORTL &= B10111111; //digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, LOW);
+	delayMicroseconds(100);
 	busByte = PINC;
-	count = count | busByte;
-	count <<= 8;
+	count += busByte;
 
-	digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, HIGH);
-	digitalWrite(CHIP1_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, LOW);
-	delayMicroseconds(1);
-	busByte = PINC;
-	count = count | busByte;
-
-	digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_OE, HIGH);
+	PORTL |= B00000010; //digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_OE, HIGH);
 
 	return count;
 }

@@ -11,17 +11,17 @@
 #define MOTOR1_IN4 9
 
 /* Define other macros */
-#define SETPOINT_TIME             40          // Time between two setpoints are loaded in ms
-#define SETPOINT_SIZE             126
+#define SETPOINT_TIME             21          // Time between two setpoints are loaded in ms
+#define SETPOINT_SIZE             3
 #define PID_SAMPLE_TIME           500         // PID Sample Time specified in us            
 #define PWM_PERIOD                100         // Switching (PWM) period specified in us
 #define ANGLE_SAMPLE_ARRAY_SIZE   2000
-#define ANGLE_SAMPLE_TIME         4000        // Time between two angles are sampled specified in us
+#define ANGLE_SAMPLE_TIME         2000        // Time between two angles are sampled specified in us
 #define SERIAL_BAUD_RATE          2000000
 
 /* Declare desired yaw, pitch variables */
 float desiredYawArray[SETPOINT_SIZE];
-float desiredPitchArray[SETPOINT_SIZE]={0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00};
+float desiredPitchArray[SETPOINT_SIZE]={0.00, 0.00, 27.48};
 float desiredYaw;
 float desiredPitch;
 int i = 0; // index for traversing desired pitch array

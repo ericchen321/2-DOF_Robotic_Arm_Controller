@@ -96,28 +96,6 @@ bool PID::Compute()
 	pTerm = kp * error;
 
 	/*Compute the derivative term*/
-	/*
-	if (derivCounter >= 0)	// if we haven't populated the entire array yet then use dError as derivArray
-	{
-	dTerm = kd * dError; // use dError for the D term
-	derivArray[derivCounter] = dError;
-	derivCounter--;
-	}
-	else		// otherwise we compute average derivArray from the array
-	{
-	for (i == (DERIV_ARRAY_SIZE - 2); i >= 0; i--) { // remove the oldest derivArray
-	derivArray[i + 1] = derivArray[i];
-	}
-	derivArray[0] = dError;	// move the new dError into the derivArray array
-
-	for (i = 0; i < DERIV_ARRAY_SIZE; i++) {	// compute average derivArray from the array
-	derivAve += derivArray[i];
-	}
-	derivAve = derivAve / DERIV_ARRAY_SIZE;
-
-	dTerm = kd * derivAve; // use derivAve for the D term
-	}
-	*/
 	dTerm = kd * dError;
 
 	/*sums up the three terms to get the output*/

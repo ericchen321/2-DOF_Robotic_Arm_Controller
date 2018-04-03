@@ -4,7 +4,7 @@ void setup()
 {
   pinMode(11, OUTPUT);
   pinMode(12, OUTPUT);
-  Timer1.initialize(200);         
+  Timer1.initialize(100);         
   Timer1.pwm(11, 512);
   Timer1.pwm(12,900);
   delay(5000);

@@ -1,7 +1,8 @@
 /* included necessary libraries */
 #include <PID_v1_modified_v4.h>         // modified based on library found on https://playground.arduino.cc/Code/PIDLibrary
 #include <TimerOne_v2.h>                // modified based on library found on https://playground.arduino.cc/Code/Timer1
-#include <FlexiTimer2.h>                // used library found on https://playground.arduino.cc/Main/FlexiTimer2
+#include <TimerThree.h>                 // used library found on https://playground.arduino.cc/Code/Timer1
+#include <TimerFive.h>                  // used library found on https://playground.arduino.cc/Code/Timer1
 #include <MegaEncoderCounter_v3.h>      // modified based on library found on https://www.robogaia.com/two-axis-encoder-counter-mega-shield.html 
 
 /* Define pins */
@@ -13,19 +14,21 @@
 #define MOTOR1_IN4 9
 
 /* Define other macros */
-#define SETPOINT_TIME           40          // time between two setpoint release times in ms
-#define SETPOINT_SIZE           126
-#define PID_SAMPLE_TIME         2           // PID Sample Time specified in ms 
-#define PWM_PERIOD              200         // Switch (PWM) period specified in us
-#define SERIAL_BAUD_RATE        2000000
+#define SETPOINT_TIME             40          // time between two setpoint release times in ms
+#define SETPOINT_SIZE             126
+#define PID_SAMPLE_TIME           500         // PID Sample Time specified in us 
+#define PWM_PERIOD                100         // Switch (PWM) period specified in us
+#define ANGLE_SAMPLE_ARRAY_SIZE   1000
+#define ANGLE_SAMPLE_TIME         4000        // Time between two angles are sampled specified in us
+#define SERIAL_BAUD_RATE          2000000
 
 /* Declare desired yaw, pitch variables */
 float desiredYawArray[SETPOINT_SIZE] = {42.43, 37.09, 21.49, 2.20, -12.94, -22.21, -26.03, -24.77, -18.29, -6.09, 11.65, 30.38, 41.10, 41.10, 30.38, 11.65, -6.09, -18.29, -24.77, -26.03, -22.21, -12.94, 2.20, 21.49, 37.09, 42.43, 37.09, 21.49, 2.20, -12.94, -22.21, -26.03, -24.77, -18.29, -6.09, 11.65, 30.38, 41.10, 41.10, 30.38, 11.65, -6.09, -18.29, -24.77, -26.03, -22.21, -12.94, 2.20, 21.49, 37.09, 42.43, 37.09, 21.49, 2.20, -12.94, -22.21, -26.03, -24.77, -18.29, -6.09, 11.65, 30.38, 41.10, 41.10, 30.38, 11.65, -6.09, -18.29, -24.77, -26.03, -22.21, -12.94, 2.20, 21.49, 37.09, 42.43, 37.09, 21.49, 2.20, -12.94, -22.21, -26.03, -24.77, -18.29, -6.09, 11.65, 30.38, 41.10, 41.10, 30.38, 11.65, -6.09, -18.29, -24.77, -26.03, -22.21, -12.94, 2.20, 21.49, 37.09, 42.43, 37.09, 21.49, 2.20, -12.94, -22.21, -26.03, -24.77, -18.29, -6.09, 11.65, 30.38, 41.10, 41.10, 30.38, 11.65, -6.09, -18.29, -24.77, -26.03, -22.21, -12.94, 2.20, 21.49, 37.09, 42.43};
 float desiredPitchArray[SETPOINT_SIZE] = {0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00};
 float desiredYaw;
 float desiredPitch;
-unsigned char i = 0; // index for traversing the pitch array
-unsigned char j = 0; // index for traversing the yaw array
+int i = 0; // index for traversing the pitch array
+int j = 0; // index for traversing the yaw array
 int errorClear = 1;  // indicates if the iterm and lastError in PID should be resetted. Should be asserted by loadSetPoint, deasserted by PID.Compute
 
 /* Declare compute flag */
@@ -51,6 +54,14 @@ float KiYaw = 0;
 float KdYaw = 6;
 float KpYaw = 8.518*KdYaw;
 PID yawPID(&actualYaw, &pwmOutYaw, &desiredYaw, KpYaw, KiYaw, KdYaw, &errorClear, PID_SAMPLE_TIME);
+
+/* Declare variables for sampling angles */
+char actualPitchSampleArray[ANGLE_SAMPLE_ARRAY_SIZE];
+char desiredPitchSampleArray[ANGLE_SAMPLE_ARRAY_SIZE];
+char actualYawSampleArray[ANGLE_SAMPLE_ARRAY_SIZE];
+char desiredYawSampleArray[ANGLE_SAMPLE_ARRAY_SIZE];
+volatile int sampleFlag = 1;
+int k = 0; // index for traversing angle sample arrays
 
 /* Declare variables for code running time measurement */
 unsigned long startTime = 0;
@@ -83,9 +94,13 @@ void setup() {
   /* initialize serial communication */
   Serial.begin(SERIAL_BAUD_RATE);
 
+  /* Set angle reading sampling time*/
+  Timer5.initialize(ANGLE_SAMPLE_TIME);
+  Timer5.attachInterrupt(setSampleFlag);
+
   /* Set PID algorithm sampling time */
-  FlexiTimer2::set(PID_SAMPLE_TIME, setComputeFlag);
-  FlexiTimer2::start();
+  Timer3.initialize(PID_SAMPLE_TIME);
+  Timer3.attachInterrupt(setComputeFlag);
 }
 
 
@@ -94,17 +109,27 @@ void loop() {
   loadSetPoint();                                             // load in the next desired pitch and yaw angle
 
   if (computeFlag == 1) {
+    computeFlag = 0;
+    
     actualPitch = MegaEncoderCounter.PitchGetCount() * 0.9;     // convert decoder1 count to acutal ptich angle
     actualYaw = MegaEncoderCounter.YawGetCount() * 0.9;         // convert decoder0 count to actual yaw angle
     
     pitchPID.Compute();                                         // compute the next pitch PWM output if computeFlag is set
     yawPID.Compute();                                           // compute the next yaw PWM output if computeFlag is set, then reset computeFlag
-  
+      
     pitchMotor();                                               // power up the pitch motor
     yawMotor();                                                 // power up the yaw motor
-    computeFlag = 0;
-    serialStuff();                                            // send operating data to laptop
   }
+
+  if (sampleFlag == 1) {
+    sampleFlag = 0;
+    angleSampling();                                            // store desired and actual angle in an array
+  }
+
+  if (k == ANGLE_SAMPLE_ARRAY_SIZE) {
+    serialStuff();
+  }
+  
 }
 
 
@@ -155,16 +180,29 @@ inline void yawMotor () {
 }
 
 
+/* sample desired vs actual angle*/
+inline void angleSampling () {
+  desiredPitchSampleArray[k] = (unsigned char)desiredPitch;
+  actualPitchSampleArray[k] = (unsigned char)actualPitch;
+  desiredYawSampleArray[k] = (unsigned char)desiredYaw;
+  actualYawSampleArray[k] = (unsigned char)actualYaw;
+  k++;
+}
+
+
 /* doing serial print */
 inline void serialStuff () {
-  Serial.print(desiredPitch);
-  Serial.print(",");
-  Serial.print(actualPitch);
-  Serial.print(",");
-  Serial.print(desiredYaw);
-  Serial.print(",");
-  Serial.print(actualYaw);
-  Serial.println("");
+  for (k= 0; k < ANGLE_SAMPLE_ARRAY_SIZE; k++) {
+    Serial.print((int)desiredPitchSampleArray[k]);
+    Serial.print(",");
+    Serial.print((int)actualPitchSampleArray[k]);
+    Serial.print(",");
+    Serial.print((int)desiredYawSampleArray[k]);
+    Serial.print(",");
+    Serial.print((int)actualYawSampleArray[k]);
+    Serial.println("");
+  }
+  while (1);
 }
 
 
@@ -188,5 +226,12 @@ inline void measureSpeedStop () {
 /* set compute flag which indicates a new PID output should be computed */
 void setComputeFlag () {
   computeFlag = 1;  
+}
+
+
+
+/* set sample flag which indicates new actual and desired should be read */
+void setSampleFlag () {
+  sampleFlag = 1; 
 }
 

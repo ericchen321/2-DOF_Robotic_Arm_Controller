@@ -56,8 +56,6 @@ class PID
 
 	float iTerm; 
 	float lastError;
-	float derivArray[DERIV_ARRAY_SIZE];			 // used for computing moving average
-	int derivCounter;
 };
 #endif
 
