@@ -15,13 +15,13 @@ class MEGAEncoderCounter
    public:
 	  MEGAEncoderCounter();
       void YawReset();
-      unsigned long YawGetCount();
+      int YawGetCount();
 	  void PitchReset();
-	  unsigned long PitchGetCount();
+	  int PitchGetCount();
 
    private:
-      unsigned long count;
-      unsigned char busByte;
+      int count;
+      char busByte;
 };
 
 

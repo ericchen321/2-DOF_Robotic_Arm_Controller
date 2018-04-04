@@ -3,7 +3,7 @@
 #include <TimerOne_v2.h>                // modified based on library found on https://playground.arduino.cc/Code/Timer1
 #include <TimerThree.h>                 // used library found on https://playground.arduino.cc/Code/Timer1
 #include <TimerFive.h>                  // used library found on https://playground.arduino.cc/Code/Timer1
-#include <MegaEncoderCounter_v3.h>      // modified based on library found on https://www.robogaia.com/two-axis-encoder-counter-mega-shield.html 
+#include <MegaEncoderCounter_v5.h>      // modified based on library found on https://www.robogaia.com/two-axis-encoder-counter-mega-shield.html 
 
 /* Define pins */
 #define MOTOR0_ENA 11
@@ -23,8 +23,8 @@
 #define SERIAL_BAUD_RATE          2000000
 
 /* Declare desired yaw, pitch variables */
-float desiredYawArray[SETPOINT_SIZE] = {0.00, 42.43, 19.87};
-float desiredPitchArray[SETPOINT_SIZE] = {0.00, 0.00, 27.48};
+float desiredYawArray[SETPOINT_SIZE] = {-0.00,-212.13,-99.37};
+float desiredPitchArray[SETPOINT_SIZE] = {0.00,0.00,82.43};
 float desiredYaw;
 float desiredPitch;
 int i = 0; // index for traversing the pitch array
@@ -37,9 +37,6 @@ volatile int computeFlag = 1;
 /* Define variables for setpoint loading */
 signed long newTime = 0;
 signed long oldTime = 0;
-
-/* Initialize decoder reader object */
-MEGAEncoderCounter MegaEncoderCounter;
 
 /* Declare control variables for the PIDs, initialize setpoint control object, initialize PID control object */
 float actualPitch = 0;
@@ -78,8 +75,8 @@ void setup() {
   pinMode(MOTOR0_IN2, OUTPUT);
 
   /* reset the decoders */
-  MegaEncoderCounter.PitchReset();
-  MegaEncoderCounter.YawReset();
+  PitchReset();
+  YawReset();
   delay(1000);
 
   /* Set initial rotation direction and pwm */
@@ -111,8 +108,8 @@ void loop() {
   if (computeFlag == 1) {
     computeFlag = 0;
     
-    actualPitch = MegaEncoderCounter.PitchGetCount() * 0.9;     // convert decoder1 count to acutal ptich angle
-    actualYaw = MegaEncoderCounter.YawGetCount() * 0.9;         // convert decoder0 count to actual yaw angle
+    actualPitch = PitchGetCount() * 0.9;     // convert decoder1 count to acutal ptich angle
+    actualYaw = YawGetCount() * 0.9;         // convert decoder0 count to actual yaw angle
     
     pitchPID.Compute();                                         // compute the next pitch PWM output if computeFlag is set
     yawPID.Compute();                                           // compute the next yaw PWM output if computeFlag is set, then reset computeFlag

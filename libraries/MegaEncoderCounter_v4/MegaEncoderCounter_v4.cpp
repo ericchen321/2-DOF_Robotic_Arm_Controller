@@ -58,9 +58,9 @@ MEGAEncoderCounter::MEGAEncoderCounter()
 void MEGAEncoderCounter::YawReset()
 {
 	digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_RSTY, LOW);
-	delayMicroseconds(100);
+	delay(50);
 	digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_RSTY, HIGH);
-	delayMicroseconds(10);
+	delay(1);
 }
 
 
@@ -68,20 +68,18 @@ void MEGAEncoderCounter::YawReset()
 
 // Communicates with a HCTL-2022 IC to get the Y Axis encoder count via an 8bit parallel bus
 // see Avago/Agilent/HP HCTL-2022 PDF for details
-unsigned long MEGAEncoderCounter::YawGetCount()
+int MEGAEncoderCounter::YawGetCount()
 {
 	count = 0; // initialize count
 
 	PORTD &= B01111111; // digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, LOW);
 	PORTG &= B11111011; // digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, LOW);
-	delayMicroseconds(10);
 	busByte = PINA;
 	count += busByte;
 	count <<= 8;
 
 	PORTD |= B10000000; // digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL1, HIGH);
 	PORTG &= B11111011; // digitalWrite(CHIP0_MEGA_QUADRATURE_ENCODER_COUNTER_PIN_SEL2, LOW);
-	delayMicroseconds(10);
 	busByte = PINA;
 	count += busByte;
 
@@ -106,7 +104,7 @@ void MEGAEncoderCounter::PitchReset()
 
 // Communicates with a HCTL-2022 IC to get the Y Axis encoder count via an 8bit parallel bus
 // see Avago/Agilent/HP HCTL-2022 PDF for details
-unsigned long MEGAEncoderCounter::PitchGetCount()
+int MEGAEncoderCounter::PitchGetCount()
 {
 	count = 0; // initialize count
 

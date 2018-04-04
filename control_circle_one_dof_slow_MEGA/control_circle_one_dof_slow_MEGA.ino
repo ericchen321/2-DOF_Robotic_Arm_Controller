@@ -3,7 +3,7 @@
 #include <TimerOne_v2.h>                // modified based on library found on https://playground.arduino.cc/Code/Timer1
 #include <TimerThree.h>                 // used library found on https://playground.arduino.cc/Code/Timer1
 #include <TimerFive.h>                  // used library found on https://playground.arduino.cc/Code/Timer1
-#include <MegaEncoderCounter_v3.h>      // modified based on library found on https://www.robogaia.com/two-axis-encoder-counter-mega-shield.html 
+#include <MegaEncoderCounter_v5.h>      // modified based on library found on https://www.robogaia.com/two-axis-encoder-counter-mega-shield.html 
 
 /* Define pins */
 #define MOTOR1_ENB 12
@@ -12,16 +12,16 @@
 
 /* Define other macros */
 #define SETPOINT_TIME             40          // Time between two setpoints are loaded in ms
-#define SETPOINT_SIZE             126
+#define SETPOINT_SIZE             25
 #define PID_SAMPLE_TIME           500         // PID Sample Time specified in us            
 #define PWM_PERIOD                100         // Switching (PWM) period specified in us
 #define ANGLE_SAMPLE_ARRAY_SIZE   2000
 #define ANGLE_SAMPLE_TIME         4000        // Time between two angles are sampled specified in us
-#define SERIAL_BAUD_RATE          2000000
+#define SERIAL_BAUD_RATE          115200
 
 /* Declare desired yaw, pitch variables */
 float desiredYawArray[SETPOINT_SIZE];
-float desiredPitchArray[SETPOINT_SIZE]={0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00, 16.12, 26.87, 30.92, 28.50, 19.43, 4.30, -12.46, -24.81, -30.52, -29.71, -22.33, -8.49, 8.49, 22.33, 29.71, 30.52, 24.81, 12.46, -4.30, -19.43, -28.50, -30.92, -26.87, -16.12, -0.00};
+float desiredPitchArray[SETPOINT_SIZE]={0.00,48.37,80.61,92.75,85.50,58.28,12.90,-37.37,-74.44,-91.55,-89.14,-66.99,-25.46,25.46,66.99,89.14,91.55,74.44,37.37,-12.90,-58.28,-85.50,-92.75,-80.61,-48.37};
 float desiredYaw;
 float desiredPitch;
 int i = 0; // index for traversing desired pitch array
@@ -33,9 +33,6 @@ volatile int computeFlag = 1;
 /* Define variables for setpoint loading */
 signed long newTime = 0;
 signed long oldTime = 0;
-
-/* Initialize decoder reader object */
-MEGAEncoderCounter MegaEncoderCounter;
 
 /* Declare control variables for the PID, initialize PID control object */
 float actualPitch = 0;
@@ -63,7 +60,8 @@ void setup() {
   pinMode(MOTOR1_IN4, OUTPUT);
   
   /* reset the decoders */
-  MegaEncoderCounter.PitchReset();
+  PitchReset();
+  YawReset();
   delay(1000);
   
   /* Set initial rotation direction and pwm */
@@ -91,7 +89,7 @@ void loop() {
   
   if (computeFlag == 1) {
     computeFlag = 0;                                            // deassert computeFlag
-    actualPitch = MegaEncoderCounter.PitchGetCount() * 0.9;     // convert decoder count to acutal pitch angle
+    actualPitch = PitchGetCount() * 0.9;                        // convert decoder count to acutal pitch angle
     pitchPID.Compute();                                         // compute the next PWM output if computeFlag is set
     pitchMotor();                                               // power up the pitch motor
   }
