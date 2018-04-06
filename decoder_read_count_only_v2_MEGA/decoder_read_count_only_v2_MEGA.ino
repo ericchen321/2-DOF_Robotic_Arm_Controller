@@ -14,6 +14,6 @@ void setup()
 
 void loop() 
 {  
-  Serial.println(PitchGetCount());
+  Serial.println(YawGetCount());
   delay(100);
 }

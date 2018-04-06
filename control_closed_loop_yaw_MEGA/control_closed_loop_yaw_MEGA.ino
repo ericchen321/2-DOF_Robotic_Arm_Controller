@@ -6,16 +6,14 @@
 #include <MegaEncoderCounter_v5.h>      // modified based on library found on https://www.robogaia.com/two-axis-encoder-counter-mega-shield.html 
 
 /* Define pins */
-#define MOTOR0_ENA 12
-#define MOTOR0_IN1 8
-#define MOTOR0_IN2 9
-#define MOTOR1_ENB 11
-#define MOTOR1_IN3 6
-#define MOTOR1_IN4 7
+#define MOTOR0_ENA 11
+#define MOTOR0_IN1 6
+#define MOTOR0_IN2 7
+#define MOTOR1_ENB 12
+#define MOTOR1_IN3 8
+#define MOTOR1_IN4 9
 
 /* Define other macros */
-#define SETPOINT_TIME             40          // time between two setpoint release times in ms
-#define SETPOINT_SIZE             25
 #define PID_SAMPLE_TIME           500         // PID Sample Time specified in us 
 #define PWM_PERIOD                100         // Switch (PWM) period specified in us
 #define ANGLE_SAMPLE_ARRAY_SIZE   1000
@@ -23,28 +21,15 @@
 #define SERIAL_BAUD_RATE          115200
 
 /* Declare desired yaw, pitch variables */
-float desiredYawArray[SETPOINT_SIZE] = {0.00,7.98,29.42,57.71,84.94,104.85,113.92,110.86,96.09,71.91,43.22,17.36,2.03,2.03,17.36,43.22,71.91,96.09,110.86,113.92,104.85,84.94,57.71,29.42,7.98};
-float desiredPitchArray[SETPOINT_SIZE] = {0.00,5.50,9.59,11.29,10.26,6.71,1.44,-4.21,-8.76,-11.12,-10.77,-7.80,-2.85,2.85,7.80,10.77,11.12,8.76,4.21,-1.44,-6.71,-10.26,-11.29,-9.59,-5.50};
-float desiredYaw;
+float desiredYaw = 80;
 float desiredPitch;
-int i = 0; // index for traversing the pitch array
 int j = 0; // index for traversing the yaw array
 int errorClear = 1;  // indicates if the iterm and lastError in PID should be resetted. Should be asserted by loadSetPoint, deasserted by PID.Compute
 
 /* Declare compute flag */
 volatile int computeFlag = 1;
 
-/* Define variables for setpoint loading */
-signed long newTime = 0;
-signed long oldTime = 0;
-
 /* Declare control variables for the PIDs, initialize setpoint control object, initialize PID control object */
-float actualPitch = 0;
-float pwmOutPitch;
-float KiPitch = 0;
-float KdPitch = 6;
-float KpPitch = 8.518*KdPitch;
-PID pitchPID(&actualPitch, &pwmOutPitch, &desiredPitch, KpPitch, KiPitch, KdPitch, &errorClear, PID_SAMPLE_TIME);
 float actualYaw = 0;
 float pwmOutYaw;
 float KiYaw = 0;
@@ -53,8 +38,6 @@ float KpYaw = 8.518*KdYaw;
 PID yawPID(&actualYaw, &pwmOutYaw, &desiredYaw, KpYaw, KiYaw, KdYaw, &errorClear, PID_SAMPLE_TIME);
 
 /* Declare variables for sampling angles */
-char actualPitchSampleArray[ANGLE_SAMPLE_ARRAY_SIZE];
-char desiredPitchSampleArray[ANGLE_SAMPLE_ARRAY_SIZE];
 char actualYawSampleArray[ANGLE_SAMPLE_ARRAY_SIZE];
 char desiredYawSampleArray[ANGLE_SAMPLE_ARRAY_SIZE];
 volatile int sampleFlag = 1;
@@ -103,18 +86,13 @@ void setup() {
 
 
 void loop() {
-  loadSetPoint();                                             // load in the next desired pitch and yaw angle
-
   if (computeFlag == 1) {
     computeFlag = 0;
     
-    actualPitch = PitchGetCount() * 0.9;     // convert decoder1 count to acutal ptich angle
     actualYaw = YawGetCount() * 0.9;         // convert decoder0 count to actual yaw angle
     
-    pitchPID.Compute();                                         // compute the next pitch PWM output if computeFlag is set
     yawPID.Compute();                                           // compute the next yaw PWM output if computeFlag is set, then reset computeFlag
-      
-    pitchMotor();                                               // power up the pitch motor
+    
     yawMotor();                                                 // power up the yaw motor
   }
 

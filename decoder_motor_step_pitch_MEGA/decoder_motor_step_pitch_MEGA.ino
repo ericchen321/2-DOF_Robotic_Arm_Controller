@@ -1,5 +1,6 @@
 #include <MegaEncoderCounter_v5.h>
 #include <TimerFive.h>                  // used library found on https://playground.arduino.cc/Code/Timer1
+#include<FlexiTimer2.h>
 
 #define SPEED_SAMPLE_TIME           2000           // speed sampling time, specified in us
 #define SPEED_ARRAY_SIZE            1000           // read speed for this number of times
@@ -20,8 +21,12 @@ void setup()
   Serial.begin(115200);
     
   /* Set speed sampling time */
+  /*
   Timer5.initialize(SPEED_SAMPLE_TIME);
   Timer5.attachInterrupt(setSampleFlag);
+  */
+  FlexiTimer2::set(2, setSampleFlag);
+  FlexiTimer2::start();
 }
 
 void loop() 
@@ -33,13 +38,11 @@ void loop()
     speedInRPM = (newCount - oldCount) * 0.9 / (SPEED_SAMPLE_TIME * 0.000001) * RPM_PER_DEG_PER_SEC;
     Serial.println(speedInRPM);
     oldCount = newCount;
+    
     if (newCount >= 30000) {
       decoderOverflowFlag = 1;  
     }
-  }
-
-  if (decoderOverflowFlag){
-    while(1);
+    
   }
 }
 
